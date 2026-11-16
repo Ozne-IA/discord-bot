@@ -493,6 +493,25 @@ MESSAGES_EN: dict[str, str] = {
         "The Twitch authorization was revoked: the account must be reconnected.",
     "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
     "Depuis Discord par {}": "From Discord by {}",
+    # --- v14.10 : contact
+    "⚙️ **Tout se configure sur le panel web :** {}\n\nLes commandes de staff ne sont visibles que si tu as la permission.\n🐛 Un module ne marche pas ou une idée ? Tape `/contact`.":
+        "⚙️ **Everything is configured on the web dashboard:** {}\n\nStaff commands are only visible if you have the permission.\n🐛 A module isn't working or got an idea? Type `/contact`.",
+    "Les commandes de staff ne sont visibles que si tu as la permission.\n🐛 Un module ne marche pas ou une idée ? Tape `/contact`.": "Staff commands are only visible if you have the permission.\n🐛 A module isn't working or got an idea? Type `/contact`.",
+    "🐛 Un module ne marche pas ou une idée ? Tape `/contact`.": "🐛 A module isn't working or got an idea? Type `/contact`.",
+    "Un module ne marche pas, une idée, une question ? Choisis ci-dessous : ton message arrive directement au créateur du bot.\n\nTu peux aussi écrire à **{}**.": "A module isn't working, an idea, a question? Choose below: your message goes straight to the bot's creator.\n\nYou can also write to **{}**.",
+    "📬 Contacter le créateur": "📬 Contact the creator",
+    "Un module ne marche pas": "A module isn't working",
+    "Une idée": "An idea",
+    "Autre chose": "Something else",
+    "E-mail": "Email",
+    "Ex : les tickets ne s'ouvrent pas": "E.g.: tickets don't open",
+    "En quelques mots": "In a few words",
+    "Quel module, ce que tu as fait, ce qui s'est passé…": "Which module, what you did, what happened…",
+    "Explique-nous tout": "Tell us everything",
+    "Tu as déjà envoyé un message il y a peu. Réessaie dans {} min.": "You sent a message recently. Try again in {} min.",
+    "Tu as déjà envoyé un message il y a peu.": "You sent a message recently.",
+    "Le message n'a pas pu être transmis. Écris directement à {}.": "The message couldn't be delivered. Write directly to {}.",
+    "Merci ! Ton message est bien arrivé. Le créateur du bot peut te répondre en message privé.": "Thanks! Your message arrived. The bot's creator may reply to you by direct message.",
     # --- v14.8 : tickets
     "Ce ticket sera fermé automatiquement dans environ {} h s'il n'y a pas de nouveau message. Écris ici si ta demande n'est pas réglée.":
         "This ticket will be closed automatically in about {} h if there is no new message. Write here if your request isn't solved.",

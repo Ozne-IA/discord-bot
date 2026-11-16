@@ -22,7 +22,7 @@ import aiohttp
 import discord
 from aiohttp import web
 
-from bot import ai_keys, diagnostic, secrets_box, sharding, twitch
+from bot import ai_keys, contact, diagnostic, secrets_box, sharding, twitch
 from bot.ai_providers import PROVIDERS, ProviderError, list_models, valid_model
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
@@ -79,6 +79,7 @@ COMMAND_MODULES = {
     "Custom": "Commandes perso", "Modmail": "Modmail & invitations", "Invites": "Modmail & invitations",
     "Engagement": "Succès & quêtes", "Events": "Événements & tournois", "AI": "Assistant IA", "ModTools": "Modération",
     "Votes": "Économie", "Ops": "Configuration", "TwitchMod": "Modération", "Privacy": "Configuration",
+    "Contact": "Configuration",
 }
 TEST_KINDS = ("welcome", "dm", "goodbye", "levelup", "birthday")
 
@@ -179,6 +180,7 @@ class Dashboard:
         r.add_get("/premium", self.page("premium.html"))
         r.add_get("/commands", self.page("commands.html"))
         r.add_get("/status", self.page("status.html"))
+        r.add_get("/contact", self.contact_redirect)
         r.add_get("/og.png", self.og_image)
         r.add_get("/favicon.ico", self.favicon)
         r.add_get("/favicon.png", self.favicon)
@@ -369,6 +371,10 @@ class Dashboard:
             raise web.HTTPFound(user.display_avatar.replace(size=64, format="png").url)
         raise web.HTTPFound("/static/favicon.svg")
 
+    async def contact_redirect(self, _: web.Request) -> web.Response:
+        """Lien « Contact » du site : ouvre la messagerie avec l'e-mail du créateur du bot."""
+        raise web.HTTPFound(f"mailto:{contact.contact_email()}?subject=Bot%20Discord")
+
     async def health(self, request: web.Request) -> web.Response:
         shards = sharding.shard_summary(self.bot)
         down = [s["id"] for s in shards if not s["online"]]
@@ -554,7 +560,8 @@ class Dashboard:
             "oauth_ready": self.oauth_ready,
             "logged_in": await self._session(request) is not None,
             "version": self.bot.version,
-            "contact": os.getenv("CONTACT", "").strip(),
+            "contact": contact.public_contact(),
+            "email": contact.contact_email(),
             "commands": len(self.command_list()),
             "store_url": store_url(self.bot.application_id),
         })

@@ -22,7 +22,7 @@ log = logging.getLogger("bot.admin")
 ICONS = {"ok": "✅", "warn": "⚠️", "error": "❌"}
 
 HELP_SECTIONS = {
-    "🌐 Configuration": ["/dashboard", "/check_config"],
+    "🌐 Configuration": ["/dashboard", "/check_config", "/contact"],
     "🚪 Accueil & vérification": ["/setup_verify", "/setup_notifications", "/welcome_test"],
     "🎫 Tickets": ["/setup_ticket", "/ticket add", "/ticket remove", "/ticket priority", "/ticket reponse", "/ticket close",
                   "/ticket stats"],
@@ -58,7 +58,8 @@ class Admin(commands.Cog):
     async def help(self, interaction: discord.Interaction) -> None:
         url = dashboard_url(interaction.guild_id)
         embed = embeds.base("📖 Aide", (f"⚙️ **Tout se configure sur le panel web :** {url}\n\n" if url else "")
-                            + "Les commandes de staff ne sont visibles que si tu as la permission.")
+                            + "Les commandes de staff ne sont visibles que si tu as la permission.\n"
+                            "🐛 Un module ne marche pas ou une idée ? Tape `/contact`.")
         for section, cmds in HELP_SECTIONS.items():
             embed.add_field(name=section, value=" ".join(f"`{c}`" for c in cmds), inline=False)
         await interaction.response.send_message(embed=embed, ephemeral=True)

@@ -1213,6 +1213,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.10", "Nous contacter", ["📬 /contact : signale un module qui ne marche pas ou propose une idée, le message arrive directement au créateur",
+    "📧 Lien Contact sur le site et dans le panel"]],
   ["14.9", "Prêt pour les grands nombres", ["🧩 Le bot se découpe tout seul en shards au-delà de 2 500 serveurs",
     "📡 Shards visibles sur la page Statut et dans /ping"]],
   ["14.8", "Tickets plus rapides", ["🎫 Réponses enregistrées : /ticket reponse (5, 💎 50), avec {user}, {staff} et {number}",

@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 14.9.0 |
+| **Version** | 14.10.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 131 tests automatiques |
+| **Tests** | 134 tests automatiques |
 
 ---
 
@@ -254,6 +254,7 @@ Les commandes de staff ne s'affichent que pour ceux qui ont la permission. Chaqu
 | `/leaderboard` | Top 100 paginé |
 | `/ticket close [raison]` | Fermer son propre ticket |
 | `/ping`, `/botinfo`, `/serverinfo`, `/userinfo` | Informations |
+| `/contact` | Signaler un module qui ne marche pas, proposer une idée ou écrire au créateur du bot (arrive en MP au propriétaire) |
 | `/mes-donnees voir` · `/mes-donnees effacer` | Fichier avec ses données (tous serveurs) · effacer ses niveaux, argent, succès, rappels, anniversaire, participations (les sanctions et tickets restent) |
 
 ### Configuration (Gérer le serveur / Administrateur)
@@ -594,7 +595,7 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 131 tests
+  pytest -q        # 134 tests
   ruff check .
   ```
 
@@ -709,10 +710,11 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 
 | v14.8 | **Tickets** : réponses enregistrées (`/ticket reponse`, 5 en gratuit / 50 en 💎, variables `{user}` `{staff}` `{number}`, la réponse prend le ticket en charge), relance du staff si personne ne prend un ticket en charge, avertissement du membre avant la fermeture automatique |
 
-| **v14.9 (actuelle)** | **Shards** : le bot passe en mode AutoSharded (Discord choisit le nombre de shards, `SHARD_COUNT` pour le forcer), alertes si un shard reste coupé plus de 5 min ou dépasse 2 000 serveurs, shards visibles sur `/status`, `/ping` (shard du serveur), `/botinfo`, `/health` (`shards_down`, `?strict=1` en 503 si un shard est coupé) et envoyés à top.gg |
+| v14.9 | **Shards** : le bot passe en mode AutoSharded (Discord choisit le nombre de shards, `SHARD_COUNT` pour le forcer), alertes si un shard reste coupé plus de 5 min ou dépasse 2 000 serveurs, shards visibles sur `/status`, `/ping` (shard du serveur), `/botinfo`, `/health` (`shards_down`, `?strict=1` en 503 si un shard est coupé) et envoyés à top.gg |
+| **v14.10 (actuelle)** | **Contact** : `/contact` (🐛 bug, 💡 idée, ✉️ autre → formulaire envoyé au propriétaire en MP ou dans `OWNER_ALERT_CHANNEL_ID`, même si `OWNER_ALERTS=off`, 1 message / 10 min par personne), e-mail public `cerbere.bot.discord@gmail.com` (modifiable avec `CONTACT_EMAIL`), lien **Contact** sur toutes les pages du site et dans le panel (`/contact` → messagerie), rappel dans `/help` |
 
 **Idées pour la suite :** alertes Instagram/X, saisons de classement, découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.9.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.10.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
