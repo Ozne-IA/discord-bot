@@ -110,6 +110,8 @@ COMMANDS_EN = {
     "Durée en jours (vide = à vie)": "Duration in days (empty = lifetime)",
     "Retire le Premium offert à un serveur": "Remove gifted Premium from a server",
     "Liste des serveurs Premium": "List of Premium servers",
+    "Envoie une réponse enregistrée dans le ticket": "Send a saved reply in the ticket",
+    "Nom de la réponse (réglées dans le panel → Tickets)": "Reply name (set in the dashboard → Tickets)",
     "Voir ou effacer les données que le bot garde sur toi": "See or delete the data the bot keeps about you",
     "Reçois un fichier avec toutes les données que le bot garde sur toi": "Get a file with all the data the bot keeps about you",
     "Efface tes niveaux, ton argent, tes succès, rappels et anniversaire": "Delete your levels, money, achievements, reminders and birthday",

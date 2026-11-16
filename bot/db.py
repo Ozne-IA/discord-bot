@@ -454,6 +454,11 @@ MIGRATIONS: list[str] = [
     );
     CREATE INDEX idx_twitch_channels_guild ON twitch_channels (guild_id);
     """,
+    # v23 — tickets : relance si personne ne prend en charge, avertissement avant la fermeture auto
+    """
+    ALTER TABLE tickets ADD COLUMN alerted INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE tickets ADD COLUMN warned INTEGER NOT NULL DEFAULT 0;
+    """,
 ]
 
 

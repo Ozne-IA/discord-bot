@@ -49,6 +49,8 @@
   "tickets": {
     "max_open_per_user": 1,
     "inactive_close_hours": 72,
+    "inactive_warning": true,
+    "unclaimed_alert_minutes": 30,
     "transcripts": true,
     "feedback": true,
     "types": {
@@ -72,7 +74,8 @@
         "emoji": "💬",
         "description": "Autre demande"
       }
-    }
+    },
+    "saved_replies": []
   },
   "leveling": {
     "enabled": true,

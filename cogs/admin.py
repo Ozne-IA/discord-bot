@@ -24,7 +24,7 @@ ICONS = {"ok": "✅", "warn": "⚠️", "error": "❌"}
 HELP_SECTIONS = {
     "🌐 Configuration": ["/dashboard", "/check_config"],
     "🚪 Accueil & vérification": ["/setup_verify", "/setup_notifications", "/welcome_test"],
-    "🎫 Tickets": ["/setup_ticket", "/ticket add", "/ticket remove", "/ticket priority", "/ticket close",
+    "🎫 Tickets": ["/setup_ticket", "/ticket add", "/ticket remove", "/ticket priority", "/ticket reponse", "/ticket close",
                   "/ticket stats"],
     "📈 Niveaux": ["/rank", "/leaderboard", "/xp add", "/xp remove", "/xp reset"],
     "🔨 Modération": ["/warn", "/unwarn", "/history", "/note", "/mute", "/unmute", "/kick", "/ban",

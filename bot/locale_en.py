@@ -493,6 +493,15 @@ MESSAGES_EN: dict[str, str] = {
         "The Twitch authorization was revoked: the account must be reconnected.",
     "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
     "Depuis Discord par {}": "From Discord by {}",
+    # --- v14.8 : tickets
+    "Ce ticket sera fermé automatiquement dans environ {} h s'il n'y a pas de nouveau message. Écris ici si ta demande n'est pas réglée.":
+        "This ticket will be closed automatically in about {} h if there is no new message. Write here if your request isn't solved.",
+    "⏳ Ticket inactif": "⏳ Inactive ticket", "⏰ Ticket en attente": "⏰ Ticket waiting",
+    "Ce ticket attend une prise en charge depuis {} min. Clique sur **🙋 Prendre en charge**.":
+        "This ticket has been waiting for {} min. Click **🙋 Claim**.",
+    "Ticket #{} ({}) sans prise en charge depuis {} min.": "Ticket #{} ({}) unclaimed for {} min.",
+    "Réponse introuvable. Elles se règlent dans le panel → Tickets (5 en gratuit, 50 en 💎 Premium).":
+        "Reply not found. They are set in the dashboard → Tickets (5 free, 50 with 💎 Premium).",
     # --- v14.7 : mes données
     "Oui, tout effacer": "Yes, delete everything", "Ce bouton n'est pas pour toi.": "This button isn't for you.",
     "C'est fait : {} élément(s) effacé(s) sur tous les serveurs.": "Done: {} item(s) deleted across all servers.",

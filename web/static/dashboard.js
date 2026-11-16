@@ -345,6 +345,10 @@ function control(f) {
         oninput: (e) => update(([ok, ov]) => [ok, { ...ov, questions: e.target.value.split("|").map((q) => q.trim()).filter(Boolean).slice(0, 5) }]) }),
       removeBtn(del)),
       (list) => [`type${Date.now().toString(36)}`, { label: "Nouveau type", emoji: "🎫", description: "" }], "➕ Ajouter un type");
+    case "ticket_replies": return objectList(f.path, [
+      { key: "name", type: "text", placeholder: "Nom (ex : Merci d'attendre)" },
+      { key: "content", type: "textarea", placeholder: "Bonjour {user}, merci pour ta patience…", wide: true },
+    ], { name: "", content: "" }, "➕ Ajouter une réponse", 50);
     case "twitch_commands": return objectList(f.path, [
       { key: "trigger", type: "text", placeholder: "!discord" },
       { key: "response", type: "text", placeholder: "Rejoins le Discord : https://discord.gg/… ({user})", wide: true },
@@ -679,6 +683,9 @@ const SECTIONS = [
     { path: "tickets.types", type: "ticket_types", label: "Types de tickets", help: "25 maximum. 💎 Premium : chaque type peut avoir son propre formulaire (jusqu'à 5 questions, séparées par |).", preview: "tickets" },
     { path: "tickets.max_open_per_user", type: "number", label: "Tickets ouverts max par membre", min: 1, max: 10 },
     { path: "tickets.inactive_close_hours", type: "number", label: "Fermeture auto après (heures)", help: "Sans aucun message. 0 = jamais.", max: 2000 },
+    { path: "tickets.inactive_warning", type: "toggle", label: "Prévenir avant la fermeture auto", help: "Le membre est mentionné dans le ticket peu avant (jusqu'à 12 h avant) : un nouveau message annule la fermeture." },
+    { path: "tickets.unclaimed_alert_minutes", type: "number", label: "Relance si personne ne prend en charge (minutes)", help: "Le rôle Staff est mentionné dans le ticket et un message part dans les logs des tickets. 0 = jamais.", max: 10080 },
+    { path: "tickets.saved_replies", type: "ticket_replies", label: "Réponses enregistrées", help: "Le staff les envoie avec /ticket reponse (la liste s'affiche en tapant). Variables : {user} (le membre), {staff} (toi), {number} (n° du ticket). 5 réponses (💎 50)." },
     { path: "tickets.transcripts", type: "toggle", label: "Transcript HTML", help: "Copie de la conversation envoyée dans les logs et au membre à la fermeture." },
     { path: "tickets.feedback", type: "toggle", label: "Avis ⭐ après fermeture", help: "Le membre note le support de 1 à 5." },
   ] },
@@ -1206,6 +1213,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.8", "Tickets plus rapides", ["🎫 Réponses enregistrées : /ticket reponse (5, 💎 50), avec {user}, {staff} et {number}",
+    "⏰ Relance du staff si personne ne prend un ticket en charge", "⏳ Le membre est prévenu avant la fermeture automatique d'un ticket inactif"]],
   ["14.7", "Tes données", ["/mes-donnees voir et /mes-donnees effacer pour chaque membre",
     "Données d'un serveur effacées 30 jours après le départ du bot (gardées s'il revient)", "Vieilles statistiques et journaux effacés automatiquement"]],
   ["14.6", "Commandes du chat Twitch", ["💬 Commandes du chat Twitch (!discord, !reseaux…) réglées dans l'onglet Modération Twitch, avec {user} et {channel}"]],

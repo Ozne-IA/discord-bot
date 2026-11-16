@@ -47,9 +47,11 @@ OBJECT_LISTS = {
     "alerts.rss": (("url", "channel", "message"), ("url", "channel")),
     "economy.shop": (("name", "price", "role", "description"), ("name",)),
     "twitch_mod.commands": (("trigger", "response"), ("trigger", "response")),
+    "tickets.saved_replies": (("name", "content"), ("name", "content")),
 }
-OBJECT_LIST_MAX = {"twitch_mod.commands": 50}               # nombre d'éléments (25 par défaut)
-OBJECT_TEXT_MAX = {"twitch_mod.commands.response": 450}     # longueur d'un champ texte (300 par défaut)
+OBJECT_LIST_MAX = {"twitch_mod.commands": 50, "tickets.saved_replies": 50}               # nombre d'éléments (25 par défaut)
+OBJECT_TEXT_MAX = {"twitch_mod.commands.response": 450, "tickets.saved_replies.name": 80,
+                   "tickets.saved_replies.content": 1800}     # longueur d'un champ texte (300 par défaut)
 OBJECT_ID_FIELDS = {"channel", "role"}
 OBJECT_INT_FIELDS = {"price"}
 MAX_TEXT = 2000
@@ -95,7 +97,8 @@ FREE_OVERRIDES: dict[str, Any] = {
 
 # Limites selon la version (appliquées par les modules au moment de l'utilisation)
 LIMITS = {"tournament_players": (16, 64), "counters": (2, 5), "custom_commands": (5, 50), "role_menus": (2, 15),
-          "twitch_channels": (1, 5), "twitch_commands": (5, 50)}
+          "twitch_channels": (1, 5), "twitch_commands": (5, 50),
+          "ticket_replies": (5, 50)}
 
 
 def limit_for(kind: str, premium: bool) -> int:

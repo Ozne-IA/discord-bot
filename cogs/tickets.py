@@ -1,4 +1,5 @@
-"""Tickets : panneau à types, formulaire, claim, priorité, transcript HTML, auto-fermeture, avis."""
+"""Tickets : panneau à types, formulaire, claim, priorité, transcript HTML, auto-fermeture, avis,
+réponses enregistrées (/ticket reponse) et relance des tickets que personne n'a pris en charge."""
 from __future__ import annotations
 
 import asyncio
@@ -12,7 +13,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from bot import embeds
-from bot.config import gconf
+from bot.config import gconf, limit_for
 from bot.i18n import tr
 from bot.panels import publish_panel
 from bot.premium import is_premium
@@ -21,6 +22,34 @@ from bot.utils import is_staff, send_log
 log = logging.getLogger("cogs.tickets")
 
 PRIORITIES = {"basse": "🟢", "normale": "🟡", "haute": "🟠", "urgente": "🔴"}
+MAX_WARNING_BEFORE = 12 * 3600  # l'avertissement arrive au plus 12 h avant la fermeture automatique
+
+
+def ticket_due(ticket: dict, alert_minutes: float, close_hours: float, warn: bool, now: float) -> str | None:
+    """Ce que le bot doit faire maintenant pour ce ticket : « close », « warn », « alert » ou None."""
+    if close_hours > 0:
+        idle = now - float(ticket.get("last_activity") or now)
+        limit = close_hours * 3600
+        if idle >= limit:
+            return "close"
+        if warn and not ticket.get("warned") and idle >= limit - min(MAX_WARNING_BEFORE, limit / 4):
+            return "warn"
+    if (alert_minutes > 0 and not ticket.get("claimed_by") and not ticket.get("alerted")
+            and now - float(ticket.get("opened_at") or now) >= alert_minutes * 60):
+        return "alert"
+    return None
+
+
+def saved_replies(guild: discord.Guild | int | None) -> list[dict]:
+    """Réponses enregistrées utilisables (dans la limite gratuit / Premium)."""
+    replies = list(gconf(guild).get("tickets", "saved_replies", default=[]) or [])
+    gid = guild if isinstance(guild, int) else (guild.id if guild else 0)
+    return replies[:limit_for("ticket_replies", is_premium(gid))]
+
+
+def fill_reply(text: str, user_mention: str, staff_name: str, number: int) -> str:
+    return (text.replace("{user}", user_mention).replace("{staff}", staff_name)
+            .replace("{number}", str(number)))[:4000]
 
 
 def ticket_types(guild: discord.Guild | int | None) -> dict[str, dict]:
@@ -359,7 +388,7 @@ class Tickets(commands.Cog):
     async def on_message(self, message: discord.Message) -> None:
         if message.channel.id in self.open_channels and not message.author.bot:
             await self.db.execute(
-                "UPDATE tickets SET last_activity=? WHERE channel_id=? AND status='open'",
+                "UPDATE tickets SET last_activity=?, warned=0 WHERE channel_id=? AND status='open'",
                 (time.time(), message.channel.id))
 
     @commands.Cog.listener()
@@ -371,17 +400,46 @@ class Tickets(commands.Cog):
             "UPDATE tickets SET status='closed', closed_at=? WHERE channel_id=? AND status='open'",
             (time.time(), channel.id))
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(minutes=10)
     async def auto_close(self) -> None:
-        rows = await self.db.fetchall("SELECT channel_id, guild_id, last_activity FROM tickets WHERE status='open'")
+        """Relance les tickets sans prise en charge, prévient avant la fermeture auto, puis ferme."""
+        rows = await self.db.fetchall("SELECT * FROM tickets WHERE status='open'")
+        now = time.time()
         for row in rows:
-            hours = float(gconf(row["guild_id"]).get("tickets", "inactive_close_hours", default=0) or 0)
-            if hours <= 0 or row["last_activity"] > time.time() - hours * 3600:
+            ticket = dict(row)
+            cfg = gconf(ticket["guild_id"])
+            hours = float(cfg.get("tickets", "inactive_close_hours", default=0) or 0)
+            action = ticket_due(ticket, float(cfg.get("tickets", "unclaimed_alert_minutes", default=0) or 0), hours,
+                                bool(cfg.get("tickets", "inactive_warning", default=True)), now)
+            channel = self.bot.get_channel(ticket["channel_id"])
+            if action is None or not isinstance(channel, discord.TextChannel):
                 continue
-            channel = self.bot.get_channel(row["channel_id"])
-            if isinstance(channel, discord.TextChannel):
-                assert self.bot.user
-                await self.close_ticket(channel, self.bot.user, f"Inactif depuis {hours:g} h")
+            try:
+                await self.run_due(channel, ticket, action, hours, now)
+            except discord.HTTPException as exc:
+                log.warning("Ticket %s : action « %s » impossible (%s)", ticket["channel_id"], action, exc)
+
+    async def run_due(self, channel: discord.TextChannel, ticket: dict, action: str, hours: float, now: float) -> None:
+        if action == "close":
+            assert self.bot.user
+            await self.close_ticket(channel, self.bot.user, f"Inactif depuis {hours:g} h")
+        elif action == "warn":
+            left = max(1, round((hours * 3600 - (now - float(ticket["last_activity"]))) / 3600))
+            await self.db.execute("UPDATE tickets SET warned=1 WHERE channel_id=?", (channel.id,))
+            await channel.send(content=f"<@{ticket['user_id']}>", embed=embeds.warning(
+                f"Ce ticket sera fermé automatiquement dans environ {left} h s'il n'y a pas de nouveau message. "
+                "Écris ici si ta demande n'est pas réglée.", "⏳ Ticket inactif"),
+                allowed_mentions=discord.AllowedMentions(users=True))
+        elif action == "alert":
+            await self.db.execute("UPDATE tickets SET alerted=1 WHERE channel_id=?", (channel.id,))
+            staff = channel.guild.get_role(gconf(channel.guild).role_id("staff"))
+            minutes = round((now - float(ticket["opened_at"])) / 60)
+            await channel.send(content=staff.mention if staff else None, embed=embeds.warning(
+                f"Ce ticket attend une prise en charge depuis {minutes} min. Clique sur **🙋 Prendre en charge**.",
+                "⏰ Ticket en attente"), allowed_mentions=discord.AllowedMentions(roles=True))
+            await send_log(channel.guild, embeds.warning(
+                f"Ticket #{ticket['number']} ({channel.mention}) sans prise en charge depuis {minutes} min.",
+                "⏰ Ticket en attente"), channel="ticket_logs")
 
     @auto_close.before_loop
     async def _before_auto_close(self) -> None:
@@ -453,6 +511,35 @@ class Tickets(commands.Cog):
         await interaction.response.send_message(embed=embeds.info("Fermeture en cours…"), ephemeral=True)
         assert isinstance(interaction.channel, discord.TextChannel)
         await self.close_ticket(interaction.channel, interaction.user, raison)
+
+    @ticket.command(name="reponse", description="Envoie une réponse enregistrée dans le ticket")
+    @app_commands.describe(nom="Nom de la réponse (réglées dans le panel → Tickets)")
+    async def ticket_reply(self, interaction: discord.Interaction, nom: str) -> None:
+        ticket = await self._staff_ticket(interaction)
+        if not ticket:
+            return
+        assert interaction.guild and isinstance(interaction.channel, discord.TextChannel)
+        reply = next((r for r in saved_replies(interaction.guild)
+                      if str(r.get("name", "")).strip().lower() == nom.strip().lower()), None)
+        if reply is None:
+            await interaction.response.send_message(embed=embeds.error(
+                "Réponse introuvable. Elles se règlent dans le panel → Tickets (5 en gratuit, 50 en 💎 Premium)."),
+                ephemeral=True)
+            return
+        text = fill_reply(str(reply.get("content", "")), f"<@{ticket['user_id']}>",
+                          interaction.user.display_name, int(ticket["number"]))
+        embed = embeds.base(None, text, guild=interaction.guild)
+        embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+        await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=True))
+        if not ticket["claimed_by"]:  # répondre, c'est prendre en charge
+            await self.db.execute("UPDATE tickets SET claimed_by=? WHERE channel_id=?",
+                                  (interaction.user.id, ticket["channel_id"]))
+
+    @ticket_reply.autocomplete("nom")
+    async def _reply_autocomplete(self, interaction: discord.Interaction, current: str):
+        current = current.lower()
+        names = [str(r.get("name", "")) for r in saved_replies(interaction.guild)]
+        return [app_commands.Choice(name=n[:100], value=n[:100]) for n in names if current in n.lower()][:25]
 
     @ticket.command(name="stats", description="Statistiques des tickets")
     async def ticket_stats(self, interaction: discord.Interaction) -> None:
