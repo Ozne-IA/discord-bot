@@ -459,6 +459,30 @@ MIGRATIONS: list[str] = [
     ALTER TABLE tickets ADD COLUMN alerted INTEGER NOT NULL DEFAULT 0;
     ALTER TABLE tickets ADD COLUMN warned INTEGER NOT NULL DEFAULT 0;
     """,
+    # v24 — Premium via Patreon : compte relié, état de l'abonnement, serveur choisi
+    """
+    CREATE TABLE patreon_links (
+        user_id INTEGER PRIMARY KEY,
+        patreon_id TEXT NOT NULL UNIQUE,
+        patreon_name TEXT,
+        linked_at REAL NOT NULL
+    );
+    CREATE TABLE patreon_members (
+        patreon_id TEXT PRIMARY KEY,
+        status TEXT,
+        cents INTEGER NOT NULL DEFAULT 0,
+        cadence INTEGER,
+        next_charge TEXT,
+        updated_at REAL NOT NULL
+    );
+    CREATE TABLE patreon_slots (
+        user_id INTEGER PRIMARY KEY,
+        guild_id INTEGER NOT NULL,
+        assigned_at REAL NOT NULL,
+        active INTEGER NOT NULL DEFAULT 1
+    );
+    CREATE INDEX idx_patreon_slots_guild ON patreon_slots (guild_id);
+    """,
 ]
 
 

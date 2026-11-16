@@ -218,6 +218,39 @@ Sans `AI_KEYS_SECRET`, le panel affiche « le propriétaire du bot doit d'abord 
 - Vers 2 000 à 3 000 serveurs, surveille la **mémoire** dans Railway (onglet Metrics) : le bot garde la liste des membres de chaque serveur. Monte la limite de mémoire du service si elle approche du maximum.
 - La variable `SHARD_COUNT` sert seulement à forcer un nombre précis. Laisse-la vide.
 
+### 1 quinquies. (v15.0) Vendre Premium avec Patreon
+En attendant que Discord valide le bot (et ses abonnements), les membres paient Premium sur **Patreon**. Patreon accepte les particuliers et s'occupe de la TVA et des factures. Les revenus restent à déclarer aux impôts : renseigne-toi sur ta situation (Urssaf, impots.gouv) si les ventes deviennent régulières.
+
+**A. Créer la page Patreon (15 min)**
+1. <https://www.patreon.com/create> → crée ta page créateur au nom du bot.
+2. **Paramètres de la page → Niveaux d'adhésion (Tiers)** → crée un niveau **« Premium »** à **4,99 €/mois**.
+3. Active la **facturation annuelle** (« Annual memberships ») avec une réduction, par exemple 2 mois offerts (49,99 €/an).
+4. Publie la page et note son adresse (ex. `https://www.patreon.com/nomdubot`).
+
+**B. Créer l'application Patreon (5 min)**
+5. <https://www.patreon.com/portal/registration/register-clients> → **Create Client** :
+   - App Name : le nom du bot ; Description : « Premium du bot Discord » ;
+   - **Redirect URIs** : `https://panel.clipmovestudio.app/patreon/callback` ;
+   - **Client API Version** : **2** → **Create Client**.
+6. Ouvre le client et copie, sans les coller ailleurs que dans Railway :
+   - **Client ID** → variable `PATREON_CLIENT_ID` ;
+   - **Client Secret** → `PATREON_CLIENT_SECRET` ;
+   - **Creator's Access Token** → `PATREON_CREATOR_TOKEN` ;
+   - **Creator's Refresh Token** → `PATREON_CREATOR_REFRESH_TOKEN`.
+
+**C. Créer le webhook (3 min)**
+7. <https://www.patreon.com/portal/registration/register-webhooks> → adresse `https://panel.clipmovestudio.app/webhooks/patreon` → **+**.
+8. Coche les événements **members:create**, **members:update**, **members:delete**, **members:pledge:create**, **members:pledge:update**, **members:pledge:delete**.
+9. Copie le **Secret** du webhook → variable `PATREON_WEBHOOK_SECRET`.
+
+**D. Brancher le bot (2 min)**
+10. Railway → Variables : ajoute aussi `PATREON_URL` = l'adresse de ta page (étape 4), puis **Deploy**.
+11. Teste avec ton propre compte : panel → ton serveur → **💎 Premium** → **Relier mon compte Patreon**. Sans abonnement, le panel dit « aucun abonnement actif » : c'est normal.
+
+**Pour l'abonné, c'est simple :** il paie sur Patreon, ouvre le panel → son serveur → 💎 Premium → **Relier mon compte Patreon**, et le serveur passe Premium tout de suite. Un abonnement = un serveur (changement possible une fois par semaine). S'il arrête de payer, le Premium s'arrête tout seul. Tu reçois une alerte en MP à chaque nouveau Premium et à chaque arrêt.
+
+Quand Discord aura validé le bot, ajoute `PREMIUM_SKU_ID` : le bouton d'abonnement Discord remplace alors le bouton Patreon, et les abonnés Patreon gardent leur Premium.
+
 ### 2. Être prévenu si Railway tombe (5 minutes, gratuit)
 Si Railway entier est en panne, le bot ne peut pas te prévenir lui-même. Un service extérieur le peut :
 1. Crée un compte gratuit sur <https://uptimerobot.com> (ou Better Stack).

@@ -22,7 +22,7 @@ import aiohttp
 import discord
 from aiohttp import web
 
-from bot import ai_keys, contact, diagnostic, secrets_box, sharding, twitch
+from bot import ai_keys, contact, diagnostic, patreon, secrets_box, sharding, twitch
 from bot.ai_providers import PROVIDERS, ProviderError, list_models, valid_model
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
@@ -79,7 +79,7 @@ COMMAND_MODULES = {
     "Custom": "Commandes perso", "Modmail": "Modmail & invitations", "Invites": "Modmail & invitations",
     "Engagement": "Succès & quêtes", "Events": "Événements & tournois", "AI": "Assistant IA", "ModTools": "Modération",
     "Votes": "Économie", "Ops": "Configuration", "TwitchMod": "Modération", "Privacy": "Configuration",
-    "Contact": "Configuration",
+    "Contact": "Configuration", "Patreon": "Configuration",
 }
 TEST_KINDS = ("welcome", "dm", "goodbye", "levelup", "birthday")
 
@@ -154,6 +154,7 @@ class Dashboard:
         self._og_cache: tuple[float, bytes] | None = None
         self._last_test: dict[int, float] = {}
         self.limiter = RateLimiter()
+        self.patreon_states = twitch.OAuthStates()
 
     @property
     def oauth_ready(self) -> bool:
@@ -194,6 +195,14 @@ class Dashboard:
         r.add_get("/twitch/connect/{guild_id}", self.twitch_connect)
         r.add_get("/twitch/bot", self.twitch_bot_connect)
         r.add_get("/twitch/callback", self.twitch_callback)
+        r.add_post("/webhooks/patreon", self.patreon_webhook)
+        r.add_get("/patreon/connect/{guild_id}", self.patreon_connect)
+        r.add_get("/patreon/callback", self.patreon_callback)
+        r.add_get("/api/patreon", self.api_patreon_me)
+        r.add_post("/api/patreon/refresh", self.api_patreon_refresh)
+        r.add_delete("/api/patreon", self.api_patreon_unlink)
+        r.add_put("/api/guilds/{guild_id}/patreon", self.api_patreon_assign)
+        r.add_delete("/api/guilds/{guild_id}/patreon", self.api_patreon_unassign)
         r.add_get("/login", self.login)
         r.add_get("/callback", self.callback)
         r.add_post("/logout", self.logout)
@@ -562,6 +571,7 @@ class Dashboard:
             "email": contact.contact_email(),
             "commands": len(self.command_list()),
             "store_url": store_url(self.bot.application_id),
+            "patreon_url": patreon.page_url() if patreon.configured() else None,
         })
 
     def _guild_list(self, session: dict) -> list[dict]:
@@ -640,6 +650,7 @@ class Dashboard:
             "premium": {**premium.status(guild.id),
                         "paths": PREMIUM_PATHS,
                         "store_url": store_url(self.bot.application_id),
+                        "patreon_url": patreon.page_url() if patreon.configured() else None,
                         "trial": await premium.trial_state(self.db, guild.id), "trial_days": trial_days(),
                         "twitch_enabled": bool(os.getenv("TWITCH_CLIENT_ID") and os.getenv("TWITCH_CLIENT_SECRET")),
                         "ai_ready": bool(os.getenv("ANTHROPIC_API_KEY", "").strip())},
@@ -895,6 +906,130 @@ class Dashboard:
         if not self.public_url.startswith("https://"):
             return "Le site du bot doit être en HTTPS (PUBLIC_URL) pour recevoir les messages de Twitch."
         return None
+
+    # ------------------------------------------------------------------ #
+    #  Premium via Patreon
+    # ------------------------------------------------------------------ #
+    def _patreon_cog(self):
+        cog = self.bot.get_cog("Patreon")
+        if cog is None:
+            raise HTTPError(503, "Le module Patreon n'est pas chargé.")
+        return cog
+
+    async def patreon_webhook(self, request: web.Request) -> web.Response:
+        cog = self.bot.get_cog("Patreon")
+        if cog is None:
+            return web.json_response({"error": "indisponible"}, status=503)
+        raw = await request.read()
+        status, body = await cog.handle_webhook(request.headers, raw)  # type: ignore[attr-defined]
+        return web.json_response(body, status=status)
+
+    async def patreon_connect(self, request: web.Request) -> web.StreamResponse:
+        """Le membre relie son compte Patreon (redirection vers Patreon)."""
+        if await self._session(request) is None:
+            raise web.HTTPFound("/login")
+        session, guild = await self._require_guild(request, "full")
+        back = f"/dashboard#/guild/{guild.id}/premium"
+        if not (patreon.configured() and self.public_url.startswith("https://")):
+            return self._message_page("Patreon pas encore disponible", "Le propriétaire du bot doit d'abord configurer "
+                                      "Patreon (PATREON_CLIENT_ID, PATREON_CLIENT_SECRET et PUBLIC_URL en HTTPS).", back)
+        state = self.patreon_states.create(guild_id=guild.id, user_id=session["user_id"])
+        raise web.HTTPFound(patreon.authorize_url(f"{self.public_url}/patreon/callback", state))
+
+    async def patreon_callback(self, request: web.Request) -> web.StreamResponse:
+        data = self.patreon_states.pop(request.query.get("state", ""))
+        if not data:
+            return self._message_page("Connexion expirée", "Recommence depuis le panel (le lien est valable 10 minutes).")
+        back = f"/dashboard#/guild/{data['guild_id']}/premium"
+        if "error" in request.query or not request.query.get("code"):
+            return self._message_page("Connexion annulée", "Patreon n'a pas donné l'autorisation.", back)
+        session = await self._session(request)
+        if not session or session["user_id"] != data["user_id"]:
+            return self._message_page("Connexion refusée", "Reconnecte-toi au panel puis recommence.", back)
+        cog = self._patreon_cog()
+        try:
+            state = await cog.complete_link(session["user_id"], request.query["code"],
+                                             f"{self.public_url}/patreon/callback")
+        except patreon.PatreonError as exc:
+            log.warning("Connexion Patreon impossible : %s", exc)
+            return self._message_page("Connexion impossible", "Patreon n'a pas répondu correctement, réessaie.", back)
+        guild = self.bot.get_guild(int(data["guild_id"]))
+        if state["active"] and not state["guild_id"] and guild is not None:
+            before = await patreon.premium_guilds(self.db)
+            try:
+                await patreon.assign(self.db, session["user_id"], guild.id)
+            except ValueError as exc:
+                return self._message_page("✅ Compte Patreon relié", str(exc), back)
+            await cog.announce(before, await patreon.refresh_premium(self.db))
+            await self._audit(guild.id, session, "patreon", ["abonnement Patreon"])
+            return self._message_page("💎 Premium activé", f"Merci ! Ton abonnement Patreon rend « {guild.name} » "
+                                      "Premium. Tu peux changer de serveur depuis le panel (une fois par semaine).", back)
+        if state["active"]:
+            return self._message_page("✅ Compte Patreon relié", "Ton abonnement est actif. Choisis le serveur qui "
+                                      "reçoit le Premium dans l'onglet 💎 Premium du panel.", back)
+        return self._message_page("✅ Compte Patreon relié", "Aucun abonnement actif n'a été trouvé pour l'instant. "
+                                  "Si tu viens de payer, attends une minute puis clique sur « Actualiser » dans "
+                                  "l'onglet 💎 Premium.", back)
+
+    async def _patreon_payload(self, user_id: int) -> dict:
+        state = await patreon.user_state(self.db, user_id)
+        guild = self.bot.get_guild(int(state["guild_id"])) if state.get("guild_id") else None
+        return {**state, "guild_name": guild.name if guild else None, "configured": patreon.configured(),
+                "page_url": patreon.page_url()}
+
+    async def api_patreon_me(self, request: web.Request) -> web.Response:
+        session = await self._require_session(request)
+        return web.json_response(await self._patreon_payload(session["user_id"]))
+
+    async def api_patreon_refresh(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session = await self._require_session(request)
+        cog = self._patreon_cog()
+        before = await patreon.premium_guilds(self.db)
+        await cog.request_sync()
+        await cog.announce(before, await patreon.refresh_premium(self.db))
+        return web.json_response(await self._patreon_payload(session["user_id"]))
+
+    async def api_patreon_unlink(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session = await self._require_session(request)
+        before = await patreon.premium_guilds(self.db)
+        await patreon.unlink(self.db, session["user_id"])
+        cog = self.bot.get_cog("Patreon")
+        after = await patreon.refresh_premium(self.db)
+        if cog is not None:
+            await cog.announce(before, after)  # type: ignore[attr-defined]
+        return web.json_response(await self._patreon_payload(session["user_id"]))
+
+    async def api_patreon_assign(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        before = await patreon.premium_guilds(self.db)
+        try:
+            await patreon.assign(self.db, session["user_id"], guild.id)
+        except ValueError as exc:
+            raise HTTPError(400, str(exc)) from None
+        after = await patreon.refresh_premium(self.db)
+        cog = self.bot.get_cog("Patreon")
+        if cog is not None:
+            await cog.announce(before, after)  # type: ignore[attr-defined]
+        await self._audit(guild.id, session, "patreon", ["abonnement Patreon"])
+        return web.json_response(await self._patreon_payload(session["user_id"]))
+
+    async def api_patreon_unassign(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        state = await patreon.user_state(self.db, session["user_id"])
+        if state.get("guild_id") != str(guild.id):
+            raise HTTPError(400, "Ton abonnement Patreon n'est pas utilisé sur ce serveur.")
+        before = await patreon.premium_guilds(self.db)
+        await patreon.unassign(self.db, session["user_id"])
+        after = await patreon.refresh_premium(self.db)
+        cog = self.bot.get_cog("Patreon")
+        if cog is not None:
+            await cog.announce(before, after)  # type: ignore[attr-defined]
+        await self._audit(guild.id, session, "patreon_remove", ["abonnement Patreon"])
+        return web.json_response(await self._patreon_payload(session["user_id"]))
 
     async def twitch_webhook(self, request: web.Request) -> web.Response:
         cog = self.bot.get_cog("TwitchMod")

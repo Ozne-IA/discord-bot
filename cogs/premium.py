@@ -11,7 +11,8 @@ from discord.ext import commands, tasks
 
 from bot import embeds
 from bot.config import store
-from bot.premium import TRIAL_KEY, premium, sku_id, trial_days, upsell_embed, upsell_view
+from bot.premium import (TRIAL_KEY, how_to_subscribe, patreon_buttons, premium, sku_id, trial_days, upsell_embed,
+                          upsell_view)
 from bot.utils import dashboard_url
 
 log = logging.getLogger("cogs.premium")
@@ -36,7 +37,7 @@ def _fmt_expiry(ts: float | None) -> str:
 class TrialView(discord.ui.View):
     """Bouton « Essai gratuit » sous /premium (réservé à ceux qui gèrent le serveur)."""
 
-    def __init__(self, cog: "Premium", with_store: bool):
+    def __init__(self, cog: "Premium", with_store: bool, guild_id: int | None = None):
         super().__init__(timeout=600)
         self.cog = cog
         button = discord.ui.Button(label=f"Essai gratuit {trial_days()} jours", emoji="🎁",
@@ -45,6 +46,9 @@ class TrialView(discord.ui.View):
         self.add_item(button)
         if with_store and sku_id():
             self.add_item(discord.ui.Button(style=discord.ButtonStyle.premium, sku_id=sku_id()))
+        elif with_store:
+            for item in patreon_buttons(guild_id):
+                self.add_item(item)
 
     async def start(self, interaction: discord.Interaction) -> None:
         assert interaction.guild
@@ -128,7 +132,7 @@ class Premium(commands.Cog):
             await db.set_setting(gid, key, str(now))
             when = discord.utils.format_dt(datetime.fromtimestamp(ends), "R")
             embed = embeds.base(title, text.format(name=guild.name, when=when), color=0xF1C40F)
-            view = upsell_view()
+            view = upsell_view(gid)
             try:
                 await guild.owner.send(embed=embed, **({"view": view} if view else {}))
             except discord.HTTPException:
@@ -169,7 +173,8 @@ class Premium(commands.Cog):
         st = premium.status(interaction.guild.id)
         features = "\n".join(f"• {f}" for f in FEATURES)
         if st["active"]:
-            source = "abonnement Discord" if st["source"] == "subscription" else "accès offert"
+            source = {"subscription": "abonnement Discord", "patreon": "abonnement Patreon"}.get(st["source"],
+                                                                                              "accès offert")
             embed = embeds.base("💎 Ce serveur est Premium",
                                 f"Merci pour ton soutien ! ({source}, {_fmt_expiry(st['expires_at'])})\n\n{features}",
                                 color=0xF1C40F)
@@ -178,12 +183,12 @@ class Premium(commands.Cog):
         embed = upsell_embed("La version complète")
         embed.description = f"Ce serveur utilise la version **gratuite**.\n\nAvec **Premium** :\n{features}"
         if not sku_id():
-            embed.description += "\n\nContacte le propriétaire du bot pour l'activer."
-        view = upsell_view()
+            embed.description += "\n\n" + how_to_subscribe()
+        view = upsell_view(interaction.guild.id)
         if await premium.trial_state(self.bot.db, interaction.guild.id) == "available":  # type: ignore[attr-defined]
             embed.description += (f"\n\n🎁 **Essai gratuit de {trial_days()} jours** (tout Premium, sans "
                                   "paiement, une seule fois par serveur).")
-            view = TrialView(self, with_store=True)
+            view = TrialView(self, with_store=True, guild_id=interaction.guild.id)
         if view:
             await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
         else:

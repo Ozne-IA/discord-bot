@@ -493,6 +493,11 @@ MESSAGES_EN: dict[str, str] = {
         "The Twitch authorization was revoked: the account must be reconnected.",
     "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
     "Depuis Discord par {}": "From Discord by {}",
+    # --- v15.0 : Patreon
+    "Abonne-toi sur Patreon (mensuel ou annuel), puis relie ton compte dans le panel, onglet 💎 Premium : le serveur passe Premium tout de suite.": "Subscribe on Patreon (monthly or yearly), then link your account in the dashboard, 💎 Premium tab: the server becomes Premium right away.",
+    "S'abonner sur Patreon": "Subscribe on Patreon",
+    "Activer dans le panel": "Activate in the dashboard",
+    "abonnement Patreon": "Patreon subscription",
     # --- v14.10 : contact
     "Merci de m'avoir ajouté ! 🎉\n\n**Configure-moi en 2 minutes sur le panel web :**\n{}\n\nCommandes utiles : `/help`, `/check_config`.\n📬 Un souci ou une idée ? Tape `/contact` : ton message arrive directement au créateur du bot.\n⚠️ Place mon rôle **au-dessus** des rôles que je dois gérer (Paramètres du serveur → Rôles).":
         "Thanks for adding me! 🎉\n\n**Set me up in 2 minutes on the web dashboard:**\n{}\n\nUseful commands: `/help`, `/check_config`.\n📬 A problem or an idea? Type `/contact`: your message goes straight to the bot's creator.\n⚠️ Put my role **above** the roles I need to manage (Server Settings → Roles).",
@@ -537,7 +542,7 @@ MESSAGES_EN: dict[str, str] = {
     "Voici tes données ({} élément(s), tous serveurs confondus). Les notes internes du staff ne sont pas incluses.":
         "Here is your data ({} item(s), across all servers). Internal staff notes are not included.",
     "📦 Mes données": "📦 My data", "🗑️ Effacer mes données": "🗑️ Delete my data",
-    "Cela efface **sur tous les serveurs** tes niveaux et ton XP, ton argent et tes objets, tes succès et quêtes, tes séries, ton anniversaire, tes rappels, tes participations (giveaways, sondages, événements) et tes votes.":
+    "Cela efface **sur tous les serveurs** tes niveaux et ton XP, ton argent et tes objets, tes succès et quêtes, tes séries, ton anniversaire, tes rappels, tes participations (giveaways, sondages, événements) et tes votes, ainsi que ton lien Patreon (le serveur qui en profite perd Premium).":
         "This deletes **on every server** your levels and XP, money and items, achievements and quests, streaks, birthday, reminders, entries (giveaways, polls, events) and votes.",
     "Les sanctions, tickets et signalements sont gardés (ils servent à la modération des serveurs). **C'est définitif.**":
         "Sanctions, tickets and reports are kept (they are used for server moderation). **This cannot be undone.**",

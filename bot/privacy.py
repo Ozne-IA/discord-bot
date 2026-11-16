@@ -44,6 +44,7 @@ USER_EXPORT = (
     ("giveaway_entries", "user_id"), ("poll_votes", "user_id"), ("suggestion_votes", "user_id"),
     ("event_participants", "user_id"), ("tournament_players", "user_id"), ("suggestions", "author_id"),
     ("tickets", "user_id"), ("cases", "user_id"), ("invite_joins", "member_id"), ("bot_votes", "user_id"),
+    ("patreon_links", "user_id"), ("patreon_slots", "user_id"),
 )
 # Ce que le membre peut effacer lui-même. Restent : sanctions, tickets, signalements, suggestions publiées,
 # invitations (anti-abus) et journaux du staff, qui servent aussi à la modération des serveurs.
@@ -53,6 +54,7 @@ USER_ERASABLE = (
     ("member_counters", "user_id"), ("birthdays", "user_id"), ("reminders", "user_id"),
     ("giveaway_entries", "user_id"), ("poll_votes", "user_id"), ("suggestion_votes", "user_id"),
     ("event_participants", "user_id"), ("bot_votes", "user_id"), ("web_sessions", "user_id"),
+    ("patreon_slots", "user_id"), ("patreon_links", "user_id"),
 )
 
 

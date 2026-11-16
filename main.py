@@ -60,6 +60,7 @@ COGS = [
     "twitch",
     "privacy",
     "contact",
+    "patreon",
 ]
 
 

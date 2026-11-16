@@ -124,7 +124,7 @@ class Privacy(commands.Cog):
     async def erase(self, interaction: discord.Interaction) -> None:
         text = ("Cela efface **sur tous les serveurs** tes niveaux et ton XP, ton argent et tes objets, tes succès et "
                 "quêtes, tes séries, ton anniversaire, tes rappels, tes participations (giveaways, sondages, événements) "
-                "et tes votes.\n\n"
+                "et tes votes, ainsi que ton lien Patreon (le serveur qui en profite perd Premium).\n\n"
                 "Les sanctions, tickets et signalements sont gardés (ils servent à la modération des serveurs). "
                 "**C'est définitif.**")
         await interaction.response.send_message(embed=embeds.warning(text, "🗑️ Effacer mes données"),

@@ -382,3 +382,13 @@ input[type=datetime-local] { background: var(--bg-2); color: var(--text); border
 .contact-banner .grow { flex: 1; min-width: 200px; }
 .contact-banner h3 { margin: 0 0 4px; }
 .contact-banner p { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* Premium via Patreon */
+.patreon-box p { margin: 6px 0 10px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 600px) { .hide-sm { display: none; } }
+@media (max-width: 600px) {
+  /* Panel connecté sur téléphone : la barre du haut tient sur une ligne */
+  .topbar:has(.user-chip:not([hidden])) { gap: 6px; }
+  .topbar:has(.user-chip:not([hidden])) .brand span { display: none; }
+}

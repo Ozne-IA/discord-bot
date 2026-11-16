@@ -55,6 +55,7 @@
       <tr><td>Clé d'API d'IA du serveur (si un admin en branche une), chiffrée, avec le fournisseur et le modèle choisis</td><td>Faire répondre l'assistant IA avec l'IA choisie par le serveur. Les questions et les textes nécessaires (FAQ, ticket à résumer) sont alors envoyés à ce fournisseur (OpenAI, Mistral, Google ou Anthropic), selon ses propres conditions</td><td>Jusqu'à sa suppression dans le Panel, ou tant que le serveur utilise le Bot</td></tr>
       <tr><td>Modération Twitch : chaîne Twitch reliée (identifiant, pseudo), autorisation Twitch du streamer (chiffrée) ; messages du chat Twitch analysés au moment où ils arrivent (seuls les messages sanctionnés sont recopiés dans le salon Discord choisi par le serveur, avec le pseudo de leur auteur)</td><td>Modérer le chat Twitch et informer le staff</td><td>Tant que la chaîne est reliée ; les messages non sanctionnés ne sont pas conservés</td></tr>
       <tr><td>Nombre de questions posées à l'assistant IA par jour (total du serveur)</td><td>Limiter l'usage de l'IA</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Abonnement Patreon relié : identifiant et nom Patreon, état de l'abonnement (actif ou non, montant, rythme), serveur choisi</td><td>Activer Premium sur le serveur choisi par l'abonné</td><td>Tant que le compte est relié (« Délier » dans le Panel ou <code>/mes-donnees effacer</code>)</td></tr>
       <tr><td>Abonnement Premium du serveur (fourni par Discord)</td><td>Activer les fonctionnalités Premium</td><td>Tant que l'abonnement existe</td></tr>
       <tr><td>Essai Premium : date de fin et personne qui l'a lancé</td><td>Ne proposer l'essai gratuit qu'une fois par serveur</td><td>Tant que le serveur utilise le Bot</td></tr>
       <tr><td>Votes pour le Bot sur top.gg (ID Discord, date, serveur où la récompense a été récupérée), transmis par top.gg</td><td>Donner la récompense de /vote une seule fois par vote</td><td>Tant que le Bot existe</td></tr>
@@ -67,7 +68,7 @@
     <p><b>Assistant IA (si le serveur l'active)</b> : la question que tu poses à l'assistant (commande <code>/ia</code>, salon d'aide IA ou mention du Bot), la conversation d'un ticket dont le staff demande un résumé, ou le sujet d'une annonce à rédiger, sont envoyés à Anthropic (fournisseur du modèle d'IA Claude) pour générer la réponse, avec les règles et la FAQ écrites par les admins du serveur. Le Bot ne conserve pas ces textes. Anthropic les traite selon sa propre politique de confidentialité (anthropic.com/legal/privacy).</p>
     <p>À la fermeture d'un ticket, un transcript (copie de la conversation du ticket) est envoyé dans le salon de logs choisi par le serveur et en message privé à la personne qui a ouvert le ticket. Il n'est pas conservé par le Bot.</p>
 
-    <p>Le captcha de vérification est généré à la demande et gardé en mémoire 5 minutes maximum ; il n'est jamais enregistré. Les paiements Premium sont traités entièrement par Discord : le Bot ne voit ni ne stocke aucune donnée bancaire.</p>
+    <p>Le captcha de vérification est généré à la demande et gardé en mémoire 5 minutes maximum ; il n'est jamais enregistré. Les paiements Premium sont traités entièrement par Discord ou par Patreon : le Bot ne voit ni ne stocke aucune donnée bancaire, ni l'adresse e-mail Patreon.</p>
 
     <h2>3. Ce que le Panel ne fait pas</h2>
     <ul>

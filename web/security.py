@@ -20,7 +20,8 @@ def bucket_for(method: str, path: str) -> str | None:
     """Catégorie de limite d'une requête (None = pas de limite)."""
     if path == "/health" or path.startswith("/static/"):
         return None
-    if path in ("/login", "/callback", "/twitch/callback", "/twitch/bot") or path.startswith("/twitch/connect/"):
+    if path in ("/login", "/callback", "/twitch/callback", "/twitch/bot", "/patreon/callback") \
+            or path.startswith(("/twitch/connect/", "/patreon/connect/")):
         return "auth"
     if path == "/webhooks/twitch":
         return None  # messages du chat Twitch : nombreux, et chacun est signé (vérifié avant tout traitement)

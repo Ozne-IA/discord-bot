@@ -1028,7 +1028,8 @@ const AUDIT_LABELS = { config: "a modifié la configuration", autocreate: "a lan
   panels: "a publié les panneaux", send: "a envoyé un message", rolemenu: "a publié un menu de rôles", import: "a importé une sauvegarde",
   template: "a appliqué un modèle", trial: "a démarré l'essai Premium", ai_key: "a branché une IA",
   ai_key_delete: "a supprimé la clé IA", twitch_connect: "a relié une chaîne Twitch",
-  twitch_disconnect: "a délié une chaîne Twitch" };
+  twitch_disconnect: "a délié une chaîne Twitch", patreon: "a activé Premium avec Patreon",
+  patreon_remove: "a retiré son Premium Patreon" };
 // (l'onglet Statistiques est visible avec l'accès « Statistiques » ou « Modération »)
 
 function renderAudit() {
@@ -1066,7 +1067,7 @@ function renderPremium() {
   const p = state.guild.premium;
   const status = p.active
     ? h("div", { class: "notice premium-on" }, "💎 Ce serveur est Premium",
-        p.source === "grant" ? " (accès offert)" : " (abonnement Discord)",
+        p.source === "grant" ? " (accès offert)" : p.source === "patreon" ? " (abonnement Patreon)" : " (abonnement Discord)",
         p.expires_at ? ` jusqu'au ${new Date(p.expires_at * 1000).toLocaleDateString("fr-FR")}` : "", ". Merci !")
     : h("div", { class: "notice warn" }, "Ce serveur utilise la version gratuite. Les réglages 💎 sont enregistrés mais inactifs.");
   const trial = !p.active && p.trial === "available" && fullAccess()
@@ -1085,12 +1086,76 @@ function renderPremium() {
     : null;
   const cta = p.active ? null : p.store_url
     ? h("a", { class: "btn primary big", href: p.store_url, target: "_blank", rel: "noopener" }, "💎 Passer à Premium")
+    : p.patreon_url ? null
     : h("p", { class: "muted" }, "Pour activer Premium, contacte le propriétaire du bot (ou tape /premium dans Discord).");
-  return [h("div", { class: "panel" }, h("h2", {}, "💎 Premium"), status,
+  return [h("div", { class: "panel" }, h("h2", {}, "💎 Premium"), status, renderPatreon(p), trial,
     h("div", { class: "premium-grid" },
       PREMIUM_FEATURES.map(([icon, title, text]) => h("div", { class: "feature" },
         h("div", { class: "icon" }, icon), h("h3", {}, title), h("p", {}, text)))),
-    trial, cta)];
+    cta)];
+}
+
+// Premium payé sur Patreon : relier son compte, puis choisir le serveur qui en profite
+function renderPatreon(p) {
+  if (!p.patreon_url) return null;
+  const gid = state.guild.guild.id;
+  const box = h("div", { class: "notice patreon-box" }, h("div", { class: "spinner" }));
+  const reloadGuild = async (msg) => {
+    loadGuildData(await api("GET", `/api/guilds/${gid}`));
+    state.section = "premium"; renderGuild();
+    if (msg) toast(msg);
+  };
+  const action = (label, cls, fn) => h("button", { class: `btn ${cls}`, onclick: async (e) => {
+    e.target.disabled = true;
+    try { await fn(); } catch (err) { e.target.disabled = false; toast(err.message, "err"); }
+  } }, label);
+  const subscribe = h("a", { class: "btn primary", href: p.patreon_url, target: "_blank", rel: "noopener" },
+    "💳 S'abonner sur Patreon");
+  const unlink = action("Délier mon compte Patreon", "ghost small", async () => {
+    if (!confirm("Délier ton compte Patreon ? Le serveur qui profite de ton abonnement perdra Premium.")) return;
+    await api("DELETE", "/api/patreon");
+    await reloadGuild("Compte Patreon délié.");
+  });
+  const fmtDate = (t) => new Date(t * 1000).toLocaleDateString(LANG === "en" ? "en-GB" : "fr-FR");
+  const fill = (me) => {
+    const title = h("strong", {}, "💳 Premium avec Patreon");
+    let body;
+    if (!me.linked) {
+      body = [h("p", {}, "Abonne-toi sur Patreon (mensuel ou annuel), puis relie ton compte : le Premium s'active sur ce serveur."),
+        h("div", { class: "row-actions" }, subscribe,
+          fullAccess() ? h("a", { class: "btn", href: `/patreon/connect/${gid}` }, "🔗 Relier mon compte Patreon") : null)];
+    } else if (!me.active) {
+      body = [h("p", {}, `Compte Patreon relié${me.name ? ` (${me.name})` : ""}, mais aucun abonnement actif pour l'instant. `
+          + "Si tu viens de payer, attends une minute puis actualise."),
+        h("div", { class: "row-actions" }, subscribe,
+          action("🔄 Actualiser", "", async () => {
+            const res = await api("POST", "/api/patreon/refresh");
+            res.active ? await reloadGuild("Abonnement trouvé !") : (fill(res), toast("Toujours aucun abonnement actif.", "err"));
+          }), unlink)];
+    } else if (me.guild_id === gid) {
+      body = [h("p", {}, "💎 Ton abonnement Patreon rend ce serveur Premium. Merci !"),
+        h("div", { class: "row-actions" },
+          action("Retirer de ce serveur", "ghost small", async () => {
+            if (!confirm("Retirer ton Premium de ce serveur ? Tu ne pourras le mettre sur un autre serveur que dans 7 jours.")) return;
+            await api("DELETE", `/api/guilds/${gid}/patreon`);
+            await reloadGuild("Premium retiré de ce serveur.");
+          }), unlink)];
+    } else {
+      const elsewhere = me.guild_id ? `Ton abonnement est utilisé sur « ${me.guild_name || me.guild_id} ». ` : "Ton abonnement Patreon est actif. ";
+      const wait = me.can_move_at ? h("p", { class: "muted" }, `Changement de serveur possible à partir du ${fmtDate(me.can_move_at)}.`) : null;
+      body = [h("p", {}, elsewhere + "Un abonnement = un serveur Premium (changement possible une fois par semaine)."), wait,
+        h("div", { class: "row-actions" },
+          fullAccess() && !me.can_move_at ? action(me.guild_id ? "💎 Utiliser mon Premium ici à la place" : "💎 Activer Premium sur ce serveur", "primary", async () => {
+            if (me.guild_id && !confirm(`« ${me.guild_name || me.guild_id} » perdra Premium. Continuer ?`)) return;
+            await api("PUT", `/api/guilds/${gid}/patreon`);
+            await reloadGuild("💎 Premium activé sur ce serveur !");
+          }) : null, unlink)];
+    }
+    box.replaceChildren(title, ...body.filter(Boolean));
+    translateDom(box);
+  };
+  api("GET", "/api/patreon").then(fill).catch((err) => box.replaceChildren(err.message));
+  return box;
 }
 
 
@@ -1213,6 +1278,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["15.0", "Premium avec Patreon", ["💳 Abonne-toi sur Patreon (mensuel ou annuel), relie ton compte dans l'onglet 💎 Premium : le serveur passe Premium tout de suite",
+    "🔁 Un abonnement = un serveur, à changer une fois par semaine", "📱 Barre du haut du panel corrigée sur téléphone"]],
   ["14.11", "Contact plus visible", ["📬 Nouvelle page Contact sur le site, accessible depuis le menu et l'accueil",
     "💬 Le bot rappelle /contact à son arrivée sur un serveur et quand une erreur survient"]],
   ["14.10", "Nous contacter", ["📬 /contact : signale un module qui ne marche pas ou propose une idée, le message arrive directement au créateur",
@@ -1588,11 +1655,11 @@ function renderContent() {
   }
 }
 
-async function openGuild(id) {
+async function openGuild(id, section) {
   app.replaceChildren(h("div", { class: "spinner" }));
   try {
     loadGuildData(await api("GET", `/api/guilds/${id}`));
-    state.section = "overview";
+    state.section = section === "premium" ? "premium" : "overview";
     renderGuild();
     // Serveur jamais configuré : l'assistant s'ouvre tout seul (une fois par visite)
     state.wizardShown ||= new Set();
@@ -1639,8 +1706,8 @@ async function route() {
     document.getElementById("user-avatar").src = state.me.user.avatar;
     document.getElementById("user-name").textContent = state.me.user.name;
   }
-  const m = hash.match(/^#\/guild\/(\d+)/);
-  if (m) return openGuild(m[1]);
+  const m = hash.match(/^#\/guild\/(\d+)(?:\/(\w+))?/);
+  if (m) return openGuild(m[1], m[2]);
   renderGuildList();
 }
 
