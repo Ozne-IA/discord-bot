@@ -200,6 +200,16 @@ Les admins peuvent coller leur clé ChatGPT, Mistral, Gemini ou Claude dans le p
 
 Sans `AI_KEYS_SECRET`, le panel affiche « le propriétaire du bot doit d'abord activer cette fonction ».
 
+### 1 ter. (v14.5) Modération Twitch
+À faire une seule fois. Il faut que `AI_KEYS_SECRET` soit déjà rempli (il chiffre aussi les autorisations Twitch).
+1. **Crée le compte Twitch du bot** sur <https://www.twitch.tv/signup> (le nom sera visible dans les chats : par exemple celui de ton bot Discord). Active la double authentification.
+2. **Sur <https://dev.twitch.tv/console>** → ton application (celle des alertes Twitch) → **Manage** → **OAuth Redirect URLs** → ajoute `https://panel.clipmovestudio.app/twitch/callback` → **Save**.
+3. **Secret des événements** : dans un terminal, dans le dossier du bot, tape
+   `venv\Scripts\python -c "import secrets; print(secrets.token_urlsafe(32))"`
+   et colle le résultat dans la variable Railway **`TWITCH_EVENTSUB_SECRET`** (avec `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` déjà remplis), puis redéploie.
+4. **Connecte le compte du bot** : dans un navigateur où tu es connecté à Twitch **avec le compte du bot** (fenêtre privée conseillée), connecte-toi au panel avec ton compte Discord, ouvre un serveur → onglet **Modération Twitch** → **Connecter le compte Twitch du bot (propriétaire)**, et accepte.
+5. Les streamers n'ont plus qu'à cliquer sur **Connecter ma chaîne Twitch** dans leur panel, puis taper `/mod nomdubot` dans leur chat.
+
 ### 2. Être prévenu si Railway tombe (5 minutes, gratuit)
 Si Railway entier est en panne, le bot ne peut pas te prévenir lui-même. Un service extérieur le peut :
 1. Crée un compte gratuit sur <https://uptimerobot.com> (ou Better Stack).

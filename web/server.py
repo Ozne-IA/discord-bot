@@ -22,13 +22,14 @@ import aiohttp
 import discord
 from aiohttp import web
 
-from bot import ai_keys, diagnostic, secrets_box
+from bot import ai_keys, diagnostic, secrets_box, twitch
 from bot.ai_providers import PROVIDERS, ProviderError, list_models, valid_model
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
 from bot.config import DEFAULTS, LIMITS, PREMIUM_PATHS, deep_merge, gconf, limit_for, store
 from bot.premium import premium, store_url, trial_days
 from bot.templates import template_list
+from bot.twitch_api import TwitchError
 from bot.panels import PANELS, publish_panel
 from web.security import RateLimiter, bucket_for, client_ip, content_security_policy
 
@@ -77,7 +78,7 @@ COMMAND_MODULES = {
     "Stats": "Statistiques", "Games": "Mini-jeux", "TempVoice": "Vocaux temporaires", "Community": "Suggestions & communauté",
     "Custom": "Commandes perso", "Modmail": "Modmail & invitations", "Invites": "Modmail & invitations",
     "Engagement": "Succès & quêtes", "Events": "Événements & tournois", "AI": "Assistant IA", "ModTools": "Modération",
-    "Votes": "Économie", "Ops": "Configuration",
+    "Votes": "Économie", "Ops": "Configuration", "TwitchMod": "Modération",
 }
 TEST_KINDS = ("welcome", "dm", "goodbye", "levelup", "birthday")
 
@@ -187,6 +188,10 @@ class Dashboard:
         r.add_static("/static", STATIC, append_version=True)
         r.add_get("/health", self.health)
         r.add_post("/webhooks/topgg", self.topgg_webhook)
+        r.add_post("/webhooks/twitch", self.twitch_webhook)
+        r.add_get("/twitch/connect/{guild_id}", self.twitch_connect)
+        r.add_get("/twitch/bot", self.twitch_bot_connect)
+        r.add_get("/twitch/callback", self.twitch_callback)
         r.add_get("/login", self.login)
         r.add_get("/callback", self.callback)
         r.add_post("/logout", self.logout)
@@ -210,6 +215,8 @@ class Dashboard:
         r.add_post("/api/guilds/{guild_id}/ai-key/models", self.api_ai_models)
         r.add_put("/api/guilds/{guild_id}/ai-key", self.api_ai_key_save)
         r.add_delete("/api/guilds/{guild_id}/ai-key", self.api_ai_key_delete)
+        r.add_get("/api/guilds/{guild_id}/twitch", self.api_twitch_status)
+        r.add_delete("/api/guilds/{guild_id}/twitch/{broadcaster_id}", self.api_twitch_disconnect)
         return app
 
     async def start(self) -> None:
@@ -847,6 +854,134 @@ class Dashboard:
         session, guild = await self._require_guild(request, "full")
         await ai_keys.delete(self.db, guild.id)
         await self._audit(guild.id, session, "ai_key_delete", [])
+        return web.json_response({"ok": True})
+
+    # ------------------------------------------------------------------ #
+    #  Modération Twitch
+    # ------------------------------------------------------------------ #
+    def _twitch_cog(self):
+        cog = self.bot.get_cog("TwitchMod")
+        if cog is None:
+            raise HTTPError(503, "Le module Twitch n'est pas chargé.")
+        return cog
+
+    @staticmethod
+    def _message_page(title: str, text: str, back: str = "/dashboard") -> web.Response:
+        import html as html_lib
+        body = (f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" '
+                f'content="width=device-width, initial-scale=1"><title>{html_lib.escape(title)}</title>'
+                f'<link rel="stylesheet" href="/static/style.css"></head><body><main style="max-width:560px;'
+                f'margin:12vh auto;padding:0 16px"><div class="panel"><h2>{html_lib.escape(title)}</h2>'
+                f'<p>{html_lib.escape(text)}</p><p><a class="btn primary" href="{html_lib.escape(back)}">'
+                f'Retour au panel</a></p></div></main></body></html>')
+        return web.Response(text=body, content_type="text/html")
+
+    def _twitch_problem(self) -> str | None:
+        if not twitch.configured():
+            return ("Le propriétaire du bot doit d'abord configurer Twitch "
+                    "(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET et TWITCH_EVENTSUB_SECRET).")
+        if not secrets_box.available():
+            return "Le propriétaire du bot doit d'abord configurer AI_KEYS_SECRET (chiffrement des autorisations)."
+        if not self.public_url.startswith("https://"):
+            return "Le site du bot doit être en HTTPS (PUBLIC_URL) pour recevoir les messages de Twitch."
+        return None
+
+    async def twitch_webhook(self, request: web.Request) -> web.Response:
+        cog = self.bot.get_cog("TwitchMod")
+        if cog is None:
+            return web.Response(status=503, text="indisponible")
+        raw = await request.read()
+        status, text, content_type = await cog.handle_webhook(request.headers, raw)  # type: ignore[attr-defined]
+        return web.Response(status=status, text=text if status != 204 else None, content_type=content_type)
+
+    async def twitch_connect(self, request: web.Request) -> web.StreamResponse:
+        """Le streamer relie sa chaîne Twitch à ce serveur (redirection vers Twitch)."""
+        session, guild = await self._require_guild(request, "full")
+        back = f"/dashboard#/guild/{guild.id}"
+        if problem := self._twitch_problem():
+            return self._message_page("Twitch pas encore disponible", problem, back)
+        cog = self._twitch_cog()
+        state = cog.states.create(kind="broadcaster", guild_id=guild.id, user_id=session["user_id"])
+        raise web.HTTPFound(twitch.authorize_url(f"{self.public_url}/twitch/callback", twitch.BROADCASTER_SCOPES,
+                                                 state))
+
+    async def twitch_bot_connect(self, request: web.Request) -> web.StreamResponse:
+        """Propriétaire du bot : connecte le compte Twitch qui modère (une seule fois)."""
+        session = await self._require_session(request)
+        if not await self.bot.is_owner(discord.Object(id=session["user_id"])):
+            raise HTTPError(403, "Réservé au propriétaire du bot.")
+        if problem := self._twitch_problem():
+            return self._message_page("Twitch pas encore disponible", problem)
+        cog = self._twitch_cog()
+        state = cog.states.create(kind="bot", user_id=session["user_id"])
+        raise web.HTTPFound(twitch.authorize_url(f"{self.public_url}/twitch/callback", twitch.BOT_SCOPES, state))
+
+    async def twitch_callback(self, request: web.Request) -> web.StreamResponse:
+        cog = self._twitch_cog()
+        data = cog.states.pop(request.query.get("state", ""))
+        if not data:
+            return self._message_page("Connexion expirée", "Recommence depuis le panel (le lien est valable 10 minutes).")
+        back = f"/dashboard#/guild/{data['guild_id']}" if data.get("guild_id") else "/dashboard"
+        if "error" in request.query or not request.query.get("code"):
+            return self._message_page("Connexion annulée", "Twitch n'a pas donné l'autorisation.", back)
+        session = await self._session(request)
+        if not session or session["user_id"] != data["user_id"]:
+            return self._message_page("Connexion refusée", "Reconnecte-toi au panel puis recommence.", back)
+        try:
+            tokens = await cog.api.exchange_code(request.query["code"], f"{self.public_url}/twitch/callback")
+            info = await cog.api.validate(tokens["access_token"])
+        except (TwitchError, KeyError):
+            return self._message_page("Connexion impossible", "Twitch n'a pas répondu correctement, réessaie.", back)
+        if not info or not info.get("user_id"):
+            return self._message_page("Connexion impossible", "Twitch n'a pas confirmé le compte, réessaie.", back)
+        if data["kind"] == "bot":
+            if missing := twitch.missing_scopes(info.get("scopes") or [], twitch.BOT_SCOPES):
+                return self._message_page("Autorisations manquantes", "Il manque : " + ", ".join(missing), back)
+            await cog.connect_bot(info, tokens)
+            log.info("Compte Twitch du bot connecté : %s", info.get("login"))
+            return self._message_page("✅ Compte Twitch du bot connecté",
+                                      f"Le bot modérera avec le compte « {info.get('login')} ». Les streamers doivent "
+                                      "le nommer modérateur (/mod).", back)
+        if missing := twitch.missing_scopes(info.get("scopes") or [], twitch.BROADCASTER_SCOPES):
+            return self._message_page("Autorisations manquantes", "Il manque : " + ", ".join(missing), back)
+        error = await cog.connect_channel(int(data["guild_id"]), data["user_id"], info, tokens)
+        if error:
+            return self._message_page("Chaîne non reliée", error, back)
+        await self._audit(int(data["guild_id"]), session, "twitch_connect", [str(info.get("login"))])
+        bot_account = await cog.api.bot_account()
+        name = bot_account["login"] if bot_account else "le bot"
+        return self._message_page("✅ Chaîne Twitch reliée",
+                                  f"La chaîne « {info.get('login')} » est reliée. Dernière étape : tape /mod {name} "
+                                  "dans ton chat Twitch pour que le bot puisse modérer.", back)
+
+    async def api_twitch_status(self, request: web.Request) -> web.Response:
+        session, guild = await self._require_guild(request, "moderation")
+        cog = self.bot.get_cog("TwitchMod")
+        problem = self._twitch_problem() if cog else "Le module Twitch n'est pas chargé."
+        bot_account = await cog.api.bot_account() if cog and cog.api else None
+        channels = []
+        if cog:
+            for ch in await cog.guild_channels(guild.id):
+                is_mod = await cog.api.is_moderator(ch["broadcaster_id"]) if bot_account and not problem else None
+                channels.append({"id": str(ch["broadcaster_id"]), "login": ch["login"], "is_mod": is_mod,
+                                 "active": ch["broadcaster_id"] in cog.active})
+        return web.json_response({
+            "problem": problem, "bot": {"login": bot_account["login"]} if bot_account else None,
+            "is_owner": await self.bot.is_owner(discord.Object(id=session["user_id"])),
+            "channels": channels, "limit": limit_for("twitch_channels", premium.is_premium(guild.id))})
+
+    async def api_twitch_disconnect(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        cog = self._twitch_cog()
+        try:
+            bid = int(request.match_info["broadcaster_id"])
+        except ValueError:
+            raise HTTPError(404, "Chaîne inconnue.") from None
+        if cog.channels.get(bid) != guild.id:
+            raise HTTPError(404, "Cette chaîne n'est pas reliée à ce serveur.")
+        await cog.disconnect_channel(bid)
+        await self._audit(guild.id, session, "twitch_disconnect", [cog.logins.get(bid, str(bid))])
         return web.json_response({"ok": True})
 
     async def api_trial(self, request: web.Request) -> web.Response:

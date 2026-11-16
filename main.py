@@ -56,6 +56,7 @@ COGS = [
     "modmail",
     "invites",
     "votes",
+    "twitch",
 ]
 
 

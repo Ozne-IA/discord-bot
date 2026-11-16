@@ -242,5 +242,25 @@
     "max_channel_creates": 5,
     "action": "ban",
     "whitelist": []
+  },
+  "twitch_mod": {
+    "log_channel": 0,
+    "warn_in_chat": true,
+    "timeout_minutes": 10,
+    "exempt_subscribers": false,
+    "phishing_action": "ban",
+    "links_action": "off",
+    "allowed_domains": [
+      "twitch.tv",
+      "youtube.com",
+      "youtu.be"
+    ],
+    "words_action": "delete",
+    "banned_words": [],
+    "caps_action": "off",
+    "caps_min_length": 15,
+    "caps_percent": 70,
+    "repeat_action": "off",
+    "repeat_count": 3
   }
 }

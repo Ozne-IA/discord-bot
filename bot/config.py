@@ -32,9 +32,12 @@ ID_LISTS = {"leveling.ignored_channels", "automod.exempt_roles", "anti_raid.whit
 # Réglages simples qui sont des IDs Discord en dehors de channels / panels / roles
 ID_SCALARS = {"giveaways.manager_role", "birthdays.channel", "birthdays.role", "temp_voice.creator_channel",
               "temp_voice.category", "suggestions.channel", "starboard.channel", "invites.channel",
-              "engagement.channel", "events.manager_role", "ai.channel", "reports.channel"}
+              "engagement.channel", "events.manager_role", "ai.channel", "reports.channel",
+              "twitch_mod.log_channel"}
 # Réglages à choix fermé
-CHOICES = {"general.language": ("fr", "en")}
+TWITCH_ACTIONS = ("off", "delete", "timeout", "ban")
+CHOICES = {"general.language": ("fr", "en"),
+           **{f"twitch_mod.{rule}_action": TWITCH_ACTIONS for rule in ("phishing", "links", "words", "caps", "repeat")}}
 # Listes d'objets : chemin -> (champs autorisés, champs obligatoires)
 OBJECT_LISTS = {
     "alerts.twitch": (("login", "channel", "message"), ("login", "channel")),
@@ -88,7 +91,8 @@ FREE_OVERRIDES: dict[str, Any] = {
 }
 
 # Limites selon la version (appliquées par les modules au moment de l'utilisation)
-LIMITS = {"tournament_players": (16, 64), "counters": (2, 5), "custom_commands": (5, 50), "role_menus": (2, 15)}
+LIMITS = {"tournament_players": (16, 64), "counters": (2, 5), "custom_commands": (5, 50), "role_menus": (2, 15),
+          "twitch_channels": (1, 5)}
 
 
 def limit_for(kind: str, premium: bool) -> int:

@@ -434,6 +434,26 @@ MIGRATIONS: list[str] = [
         updated_at REAL    NOT NULL
     );
     """,
+    # v22 — modération Twitch : comptes autorisés (jetons chiffrés) et chaînes reliées à un serveur
+    """
+    CREATE TABLE twitch_tokens (
+        user_id     INTEGER NOT NULL,
+        kind        TEXT    NOT NULL,
+        login       TEXT    NOT NULL,
+        refresh_enc TEXT    NOT NULL,
+        scopes      TEXT    NOT NULL,
+        updated_at  REAL    NOT NULL,
+        PRIMARY KEY (user_id, kind)
+    );
+    CREATE TABLE twitch_channels (
+        broadcaster_id INTEGER PRIMARY KEY,
+        guild_id       INTEGER NOT NULL,
+        login          TEXT    NOT NULL,
+        connected_by   INTEGER NOT NULL,
+        created_at     REAL    NOT NULL
+    );
+    CREATE INDEX idx_twitch_channels_guild ON twitch_channels (guild_id);
+    """,
 ]
 
 

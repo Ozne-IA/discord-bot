@@ -624,13 +624,15 @@ const SECTION_GROUP = { welcome: "community", roles: "community", levels: "commu
   engagement: "community", games: "community", birthdays: "community", tempvoice: "community", community: "community",
   counters: "community", commands: "community", rolemenus: "community", moderation: "moderation", automod: "moderation",
   security: "moderation", tickets: "tickets", modmail: "tickets", alerts: "alerts", events: "alerts",
-  messages: "messages", stats: "stats", audit: "stats", agenda: "community", ai: "community", msglog: "moderation" };
+  messages: "messages", stats: "stats", audit: "stats", agenda: "community", ai: "community", msglog: "moderation",
+  twitch: "moderation" };
 const fullAccess = () => !state.guild.access || state.guild.access.full;
 const canSee = (id) => id === "overview" || id === "premium" || id === "news" || fullAccess()
   || state.guild.access.groups.includes(SECTION_GROUP[id]) || (id === "stats" && state.guild.access.groups.includes("moderation"));
 
 // ------------------------------------------------------------------ sections
 const VARS ="Variables : {mention} {name} {server} {count}";
+const TWITCH_ACTIONS = [["off", "Désactivé"], ["delete", "Supprimer le message"], ["timeout", "Timeout"], ["ban", "Bannir"]];
 const SECTIONS = [
   { id: "overview", icon: "🏠", title: "Vue d'ensemble" },
   { id: "news", icon: "🆕", title: "Nouveautés" },
@@ -762,6 +764,22 @@ const SECTIONS = [
     { path: "reports.channel", type: "channel", label: "Salon des signalements", help: "Vide = logs de modération.", empty: "— Logs de modération —" },
     { path: "message_log.enabled", type: "toggle", label: "Journal des messages", help: "Garde les messages modifiés et supprimés pour les consulter dans l'onglet « Journal des messages ». Désactivé = rien n'est gardé." },
     { path: "message_log.days", type: "number", label: "Durée de conservation (jours)", help: "7 jours en gratuit, jusqu'à 30 en Premium. Les messages plus anciens sont effacés automatiquement.", min: 1, max: 30 },
+  ] },
+  { id: "twitch", icon: "🟣", title: "Modération Twitch", desc: "Le bot modère le chat de ta chaîne Twitch et écrit chaque sanction dans un salon Discord, avec des boutons pour débannir ou bannir sans ouvrir Twitch. Le streamer, les modos et les VIP ne sont jamais sanctionnés.", fields: [
+    { path: "twitch_mod.log_channel", type: "channel", label: "Salon du journal Twitch", help: "Vide = salon des logs de modération.", empty: "— Salon des logs de modération —" },
+    { path: "twitch_mod.phishing_action", type: "select", options: TWITCH_ACTIONS, label: "Liens d'arnaque", help: "Plus de 20 000 sites d'arnaque connus, et leurs imitations." },
+    { path: "twitch_mod.words_action", type: "select", options: TWITCH_ACTIONS, label: "Mots interdits" },
+    { path: "twitch_mod.banned_words", type: "lines", label: "Liste des mots interdits", help: "Un mot ou une expression par ligne (majuscules ignorées).", placeholder: "mot interdit" },
+    { path: "twitch_mod.links_action", type: "select", options: TWITCH_ACTIONS, label: "Liens", help: "Tous les liens, sauf les sites autorisés ci-dessous." },
+    { path: "twitch_mod.allowed_domains", type: "lines", label: "Sites autorisés", help: "Un domaine par ligne (ex : twitch.tv). Les sous-domaines sont inclus.", placeholder: "twitch.tv" },
+    { path: "twitch_mod.caps_action", type: "select", options: TWITCH_ACTIONS, label: "Trop de majuscules" },
+    { path: "twitch_mod.caps_min_length", type: "number", label: "Majuscules : longueur minimum", help: "Les messages plus courts (en lettres) sont ignorés.", min: 5, max: 500 },
+    { path: "twitch_mod.caps_percent", type: "number", label: "Majuscules : pourcentage", help: "À partir de ce pourcentage de lettres en majuscules.", min: 50, max: 100 },
+    { path: "twitch_mod.repeat_action", type: "select", options: TWITCH_ACTIONS, label: "Message répété", help: "Le même message plusieurs fois en une minute." },
+    { path: "twitch_mod.repeat_count", type: "number", label: "Répétitions avant sanction", min: 2, max: 10 },
+    { path: "twitch_mod.timeout_minutes", type: "number", label: "Durée du timeout (minutes)", help: "Pour l'automod et le bouton Timeout du journal (max 14 jours).", min: 1, max: 20160 },
+    { path: "twitch_mod.warn_in_chat", type: "toggle", label: "Prévenir dans le chat", help: "Le bot écrit « @pseudo message retiré (raison) » après une suppression ou un timeout." },
+    { path: "twitch_mod.exempt_subscribers", type: "toggle", label: "Ne pas sanctionner les abonnés" },
   ] },
   { id: "automod", icon: "🤖", title: "Automod", desc: "Filtre automatique des messages. Le staff est toujours ignoré.", fields: [
     { path: "automod.enabled", type: "toggle", label: "Activer l'automod" },
@@ -996,7 +1014,8 @@ function renderMessageLog() {
 const AUDIT_LABELS = { config: "a modifié la configuration", autocreate: "a lancé la création automatique",
   panels: "a publié les panneaux", send: "a envoyé un message", rolemenu: "a publié un menu de rôles", import: "a importé une sauvegarde",
   template: "a appliqué un modèle", trial: "a démarré l'essai Premium", ai_key: "a branché une IA",
-  ai_key_delete: "a supprimé la clé IA" };
+  ai_key_delete: "a supprimé la clé IA", twitch_connect: "a relié une chaîne Twitch",
+  twitch_disconnect: "a délié une chaîne Twitch" };
 // (l'onglet Statistiques est visible avec l'accès « Statistiques » ou « Modération »)
 
 function renderAudit() {
@@ -1138,8 +1157,51 @@ function renderAiKey() {
   return box;
 }
 
+
+// ------------------------------------------------------------------ Twitch : connexion des chaînes
+function renderTwitch() {
+  const g = state.guild;
+  const box = h("div", { class: "panel twitch-box" }, h("h2", {}, "🔗 Chaînes Twitch"), h("div", { class: "spinner" }));
+  api("GET", `/api/guilds/${g.guild.id}/twitch`).then((t) => {
+    const items = [h("h2", {}, "🔗 Chaînes Twitch")];
+    if (t.problem) items.push(h("div", { class: "notice warn" }, t.problem));
+    if (!t.bot) {
+      items.push(h("div", { class: "notice warn" }, "Le compte Twitch du bot n'est pas encore connecté par le propriétaire du bot."));
+      if (t.is_owner && !t.problem) items.push(h("p", {}, h("a", { class: "btn primary", href: "/twitch/bot" }, "🤖 Connecter le compte Twitch du bot (propriétaire)")));
+    } else {
+      items.push(h("p", { class: "desc" }, `Compte du bot : ${t.bot.login}. `,
+        t.is_owner ? h("a", { href: "/twitch/bot" }, "Changer de compte (propriétaire)") : null));
+    }
+    if (!t.channels.length) items.push(h("p", { class: "muted" }, "Aucune chaîne reliée pour l'instant."));
+    for (const ch of t.channels) {
+      const status = ch.is_mod === true ? "✅ le bot est modérateur"
+        : ch.is_mod === false ? `⚠️ tape « /mod ${t.bot ? t.bot.login : "nomdubot"} » dans ton chat Twitch`
+        : "❔ statut de modérateur inconnu";
+      items.push(h("div", { class: "row twitch-channel" },
+        h("a", { href: `https://twitch.tv/${ch.login}`, target: "_blank", rel: "noopener" }, `🟣 ${ch.login}`),
+        h("span", { class: ch.is_mod === false ? "warn-text" : "muted" }, status, ch.active ? "" : " · inactive (limite gratuite : 1 chaîne)"),
+        fullAccess() ? h("button", { class: "btn ghost small", onclick: async () => {
+          if (!confirm(`Délier la chaîne ${ch.login} ? Le bot arrêtera de la modérer.`)) return;
+          try { await api("DELETE", `/api/guilds/${g.guild.id}/twitch/${ch.id}`); toast("Chaîne déliée"); renderContent(); }
+          catch (err) { toast(err.message, "err"); }
+        } }, "Délier") : null));
+    }
+    if (fullAccess() && !t.problem && t.bot) {
+      items.push(t.channels.length < t.limit
+        ? h("p", {}, h("a", { class: "btn primary", href: `/twitch/connect/${g.guild.id}` }, "🟣 Connecter ma chaîne Twitch"))
+        : h("p", { class: "muted" }, `Limite atteinte (${t.limit} chaîne${t.limit > 1 ? "s" : ""}). 💎 Premium : jusqu'à 5 chaînes.`));
+      items.push(h("p", { class: "help" }, "Connecte-toi avec le compte Twitch du streamer. Ensuite, tape /mod suivi du nom du bot dans le chat pour qu'il puisse modérer."));
+    }
+    box.replaceChildren(...items.filter(Boolean));
+    translateDom(box);
+  }).catch((err) => { box.replaceChildren(h("h2", {}, "🔗 Chaînes Twitch"), h("div", { class: "notice warn" }, err.message)); });
+  return box;
+}
+
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.5", "Modération Twitch", ["🟣 Nouvel onglet Modération Twitch : connecte ta chaîne, le bot modère le chat (arnaques, mots interdits, liens, majuscules, répétitions)",
+    "Journal des sanctions Twitch dans Discord, avec boutons Débannir / Timeout / Bannir", "Les bans et timeouts des modos Twitch sont aussi journalisés"]],
   ["14.4", "Ton IA, gratuitement", ["🔑 Branche ta propre IA (ChatGPT, Mistral, Gemini ou Claude) dans l'onglet Assistant IA : l'assistant devient gratuit",
     "Ta clé est chiffrée et n'est jamais réaffichée", "💎 Premium garde l'IA incluse, sans clé"]],
   ["14.3", "Règles de Discord", ["Rôle Membre donné automatiquement quand un nouveau venu accepte l'écran de règles de Discord (onglet Vérification)"]],
@@ -1371,7 +1433,7 @@ const NAV_GROUPS = [
   ["Démarrage", ["overview", "news", "stats", "general"]],
   ["Accueil", ["welcome", "verify", "roles", "rolemenus", "modmail"]],
   ["Communauté", ["levels", "engagement", "economy", "games", "agenda", "events", "birthdays", "community", "tempvoice"]],
-  ["Modération", ["moderation", "automod", "security", "msglog"]],
+  ["Modération", ["moderation", "automod", "twitch", "security", "msglog"]],
   ["Support & IA", ["tickets", "ai"]],
   ["Outils", ["alerts", "messages", "counters", "commands"]],
   ["Gestion", ["access", "backup", "audit", "premium"]],
@@ -1486,7 +1548,8 @@ function renderContent() {
         ? h("div", { class: "notice warn" }, "Les alertes Twitch ne sont pas encore activées sur ce bot (le propriétaire doit ajouter les clés Twitch). YouTube fonctionne.")
         : null,
       section.fields.map(field)),
-      section.id === "ai" ? renderAiKey() : null];
+      section.id === "ai" ? renderAiKey() : null,
+      section.id === "twitch" ? renderTwitch() : null];
   }
 
   holder.replaceChildren(...[content].flat(Infinity).filter((c) => c !== null && c !== undefined && c !== false));

@@ -472,5 +472,26 @@ MESSAGES_EN: dict[str, str] = {
     "Impossible de donner {} à {} : place mon rôle au-dessus de ce rôle.":
         "Couldn't give {} to {}: move my role above that role.",
     "⚠️ Vérification": "⚠️ Verification",
+    # --- v14.5 : modération Twitch
+    "Twitch · {}": "Twitch · {}", "{} par l'automod": "{} by automod", "🛡️ Message supprimé": "🛡️ Message deleted",
+    "⏳ Timeout {}": "⏳ Timeout {}", "🔨 Banni": "🔨 Banned", "✅ Débanni": "✅ Unbanned",
+    "🔨 Banni par {}": "🔨 Banned by {}", "⏳ Timeout par {}": "⏳ Timed out by {}",
+    "⏳ Timeout par {} (jusqu'à {} UTC)": "⏳ Timed out by {} (until {} UTC)", "✅ Débanni par {}": "✅ Unbanned by {}",
+    "{} depuis Discord par {}": "{} from Discord by {}", "{} sur Twitch.": "{} on Twitch.",
+    "Chaîne": "Channel", "Spectateur": "Viewer", "Règle": "Rule",
+    "Lien d'arnaque": "Scam link", "Lien non autorisé": "Link not allowed",
+    "Trop de majuscules": "Too many caps", "Message répété": "Repeated message",
+    "Débannir / annuler": "Unban / undo", "Timeout": "Timeout", "Bannir": "Ban",
+    "Cette chaîne n'est plus reliée à ce serveur.": "This channel is no longer linked to this server.",
+    "Chaîne **{}** : {}": "Channel **{}**: {}", "⚠️ Modération Twitch": "⚠️ Twitch moderation",
+    "Le bot n'est pas modérateur de cette chaîne : tape /mod <nom du bot> dans le chat.":
+        "The bot is not a moderator of this channel: type /mod <bot name> in the chat.",
+    "Twitch limite les actions : réessaie dans une minute.": "Twitch is rate limiting actions: try again in a minute.",
+    "Twitch a refusé : {}": "Twitch refused: {}", "Twitch a refusé l'action (erreur {}).": "Twitch refused the action (error {}).",
+    "Le compte Twitch du bot n'est pas encore connecté.": "The bot's Twitch account is not connected yet.",
+    "L'autorisation Twitch a été retirée : il faut reconnecter le compte.":
+        "The Twitch authorization was revoked: the account must be reconnected.",
+    "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
+    "Depuis Discord par {}": "From Discord by {}",
     "Sauvegarde trop grosse une fois décompressée.": "Backup too large once decompressed.",
 }

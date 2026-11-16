@@ -15,7 +15,8 @@ ACCESS_GROUPS: dict[str, tuple[str, tuple[str, ...]]] = {
         "welcome", "channels.welcome", "channels.goodbye", "channels.level_up", "leveling", "roles.level_roles",
         "roles.notifications", "panels.notifications", "economy", "games", "birthdays", "reminders", "suggestions",
         "starboard", "temp_voice", "counters", "custom_commands", "role_menus", "engagement", "events", "ai")),
-    "moderation": ("Modération", ("moderation", "automod", "anti_raid", "anti_nuke", "reports", "message_log")),
+    "moderation": ("Modération", ("moderation", "automod", "anti_raid", "anti_nuke", "reports", "message_log",
+                                  "twitch_mod")),
     "tickets": ("Tickets & modmail", (
         "tickets", "panels.tickets", "channels.ticket_category", "channels.ticket_logs", "modmail", "invites")),
     "alerts": ("Alertes & événements", ("alerts", "giveaways")),
