@@ -493,5 +493,17 @@ MESSAGES_EN: dict[str, str] = {
         "The Twitch authorization was revoked: the account must be reconnected.",
     "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
     "Depuis Discord par {}": "From Discord by {}",
+    # --- v14.7 : mes données
+    "Oui, tout effacer": "Yes, delete everything", "Ce bouton n'est pas pour toi.": "This button isn't for you.",
+    "C'est fait : {} élément(s) effacé(s) sur tous les serveurs.": "Done: {} item(s) deleted across all servers.",
+    "Rien n'a été effacé.": "Nothing was deleted.",
+    "Tu as déjà demandé tes données il y a moins d'une heure.": "You already requested your data less than an hour ago.",
+    "Voici tes données ({} élément(s), tous serveurs confondus). Les notes internes du staff ne sont pas incluses.":
+        "Here is your data ({} item(s), across all servers). Internal staff notes are not included.",
+    "📦 Mes données": "📦 My data", "🗑️ Effacer mes données": "🗑️ Delete my data",
+    "Cela efface **sur tous les serveurs** tes niveaux et ton XP, ton argent et tes objets, tes succès et quêtes, tes séries, ton anniversaire, tes rappels, tes participations (giveaways, sondages, événements) et tes votes.":
+        "This deletes **on every server** your levels and XP, money and items, achievements and quests, streaks, birthday, reminders, entries (giveaways, polls, events) and votes.",
+    "Les sanctions, tickets et signalements sont gardés (ils servent à la modération des serveurs). **C'est définitif.**":
+        "Sanctions, tickets and reports are kept (they are used for server moderation). **This cannot be undone.**",
     "Sauvegarde trop grosse une fois décompressée.": "Backup too large once decompressed.",
 }

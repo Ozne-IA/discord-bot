@@ -1206,6 +1206,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.7", "Tes données", ["/mes-donnees voir et /mes-donnees effacer pour chaque membre",
+    "Données d'un serveur effacées 30 jours après le départ du bot (gardées s'il revient)", "Vieilles statistiques et journaux effacés automatiquement"]],
   ["14.6", "Commandes du chat Twitch", ["💬 Commandes du chat Twitch (!discord, !reseaux…) réglées dans l'onglet Modération Twitch, avec {user} et {channel}"]],
   ["14.5", "Modération Twitch", ["🟣 Nouvel onglet Modération Twitch : connecte ta chaîne, le bot modère le chat (arnaques, mots interdits, liens, majuscules, répétitions)",
     "Journal des sanctions Twitch dans Discord, avec boutons Débannir / Timeout / Bannir", "Les bans et timeouts des modos Twitch sont aussi journalisés"]],

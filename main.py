@@ -57,6 +57,7 @@ COGS = [
     "invites",
     "votes",
     "twitch",
+    "privacy",
 ]
 
 

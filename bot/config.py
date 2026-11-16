@@ -403,6 +403,11 @@ class ConfigStore:
         """À appeler quand le statut premium d'un serveur change."""
         self._merged.pop(guild_id, None)
 
+    def forget(self, guild_id: int) -> None:
+        """Oublie la configuration d'un serveur dont les données ont été effacées."""
+        self._overrides.pop(guild_id, None)
+        self._merged.pop(guild_id, None)
+
     def invalidate_all(self) -> None:
         self._merged.clear()
 

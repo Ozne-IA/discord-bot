@@ -78,7 +78,7 @@ COMMAND_MODULES = {
     "Stats": "Statistiques", "Games": "Mini-jeux", "TempVoice": "Vocaux temporaires", "Community": "Suggestions & communauté",
     "Custom": "Commandes perso", "Modmail": "Modmail & invitations", "Invites": "Modmail & invitations",
     "Engagement": "Succès & quêtes", "Events": "Événements & tournois", "AI": "Assistant IA", "ModTools": "Modération",
-    "Votes": "Économie", "Ops": "Configuration", "TwitchMod": "Modération",
+    "Votes": "Économie", "Ops": "Configuration", "TwitchMod": "Modération", "Privacy": "Configuration",
 }
 TEST_KINDS = ("welcome", "dm", "goodbye", "levelup", "birthday")
 

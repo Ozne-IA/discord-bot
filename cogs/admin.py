@@ -32,7 +32,8 @@ HELP_SECTIONS = {
     "🛡️ Sécurité": ["/security", "/lockdown", "/whitelist"],
     "💎 Premium": ["/premium", "/giveaway start", "/giveaway end", "/giveaway reroll", "/giveaway list",
                   "/sondage creer", "/sondage fin", "/leaderboard periode:semaine|mois"],
-    "ℹ️ Infos": ["/help", "/invite", "/vote", "/ping", "/botinfo", "/serverinfo", "/userinfo"],
+    "ℹ️ Infos": ["/help", "/invite", "/vote", "/mes-donnees voir", "/mes-donnees effacer", "/ping", "/botinfo",
+                "/serverinfo", "/userinfo"],
 }
 
 
