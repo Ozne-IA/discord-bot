@@ -261,6 +261,8 @@
     "caps_min_length": 15,
     "caps_percent": 70,
     "repeat_action": "off",
-    "repeat_count": 3
+    "repeat_count": 3,
+    "commands": [],
+    "command_cooldown": 10
   }
 }

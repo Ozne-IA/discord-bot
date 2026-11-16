@@ -203,3 +203,35 @@ async def test_channels_limit(tmp_path, monkeypatch):
     await c.load_channels()
     assert c.active == {1, 2, 3}
     await db.close()
+
+
+# --- livraison 2 : commandes du chat -----------------------------------------------
+def test_find_command_and_fill():
+    cmds = [{"trigger": "!discord", "response": "Rejoins-nous {user} !"}, {"trigger": "reseaux", "response": "x"},
+            {"trigger": "!vide", "response": "  "}]
+    assert twitch.find_command("!Discord stp", cmds, 5) == cmds[0]
+    assert twitch.find_command("!reseaux", cmds, 5) == cmds[1]            # « ! » facultatif dans le panel
+    assert twitch.find_command("!reseaux", cmds, 1) is None               # au-delà de la limite gratuite
+    assert twitch.find_command("discord", cmds, 5) is None
+    assert twitch.find_command("!vide", cmds, 5) is None and twitch.find_command("!", cmds, 5) is None
+    assert twitch.fill_response("Salut {user} sur {channel}", "Bob", "stream") == "Salut Bob sur stream"
+    assert len(twitch.fill_response("a" * 900, "", "")) == 500
+    clean = sanitize({"twitch_mod": {"commands": [{"trigger": "!a", "response": "b" * 600}, {"trigger": "", "response": "x"}]}})
+    assert clean["twitch_mod"]["commands"] == [{"trigger": "!a", "response": "b" * 450}]
+
+
+async def test_chat_command_reply_and_cooldown(cog, monkeypatch):
+    monkeypatch.setattr(twitch_cog, "is_premium", lambda g: False)
+    cog.cooldowns = {}
+    cfg = twitch_cog.gconf(None).get("twitch_mod")
+    cfg["commands"] = [{"trigger": "!discord", "response": "Discord : https://discord.gg/x ({user})"}]
+    cfg["command_cooldown"] = 30
+    ev = {**chat("!discord"), "chatter_user_name": "Bob"}
+    await cog.on_chat(ev)
+    await cog.on_chat(ev)                                                   # pendant le délai : rien
+    await cog.on_chat({**chat("!discord", chatter=100), "chatter_user_name": "Streamer"})  # le streamer aussi
+    says = [c for c in cog.api.calls if c[0] == "say"]
+    assert says == [("say", 100, "Discord : https://discord.gg/x (Bob)")]
+    cog.cooldowns.clear()
+    await cog.on_chat({**chat("!discord", badges=("moderator",)), "chatter_user_name": "Modo"})
+    assert cog.api.calls[-1] == ("say", 100, "Discord : https://discord.gg/x (Modo)")

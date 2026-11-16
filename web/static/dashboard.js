@@ -345,6 +345,10 @@ function control(f) {
         oninput: (e) => update(([ok, ov]) => [ok, { ...ov, questions: e.target.value.split("|").map((q) => q.trim()).filter(Boolean).slice(0, 5) }]) }),
       removeBtn(del)),
       (list) => [`type${Date.now().toString(36)}`, { label: "Nouveau type", emoji: "🎫", description: "" }], "➕ Ajouter un type");
+    case "twitch_commands": return objectList(f.path, [
+      { key: "trigger", type: "text", placeholder: "!discord" },
+      { key: "response", type: "text", placeholder: "Rejoins le Discord : https://discord.gg/… ({user})", wide: true },
+    ], { trigger: "", response: "" }, "➕ Ajouter une commande", 50);
     case "alerts_twitch": return objectList(f.path, [
       { key: "login", type: "text", placeholder: "Pseudo Twitch (ex : zerator)" },
       { key: "channel", type: "channel" },
@@ -780,6 +784,8 @@ const SECTIONS = [
     { path: "twitch_mod.timeout_minutes", type: "number", label: "Durée du timeout (minutes)", help: "Pour l'automod et le bouton Timeout du journal (max 14 jours).", min: 1, max: 20160 },
     { path: "twitch_mod.warn_in_chat", type: "toggle", label: "Prévenir dans le chat", help: "Le bot écrit « @pseudo message retiré (raison) » après une suppression ou un timeout." },
     { path: "twitch_mod.exempt_subscribers", type: "toggle", label: "Ne pas sanctionner les abonnés" },
+    { path: "twitch_mod.commands", type: "twitch_commands", label: "Commandes du chat", help: "Quand quelqu'un écrit la commande dans le chat Twitch, le bot répond. Variables : {user} (pseudo), {channel} (chaîne). 5 commandes (💎 50)." },
+    { path: "twitch_mod.command_cooldown", type: "number", label: "Délai entre deux réponses (secondes)", help: "Pour une même commande, évite que le bot réponde en boucle.", min: 0, max: 3600 },
   ] },
   { id: "automod", icon: "🤖", title: "Automod", desc: "Filtre automatique des messages. Le staff est toujours ignoré.", fields: [
     { path: "automod.enabled", type: "toggle", label: "Activer l'automod" },
@@ -1200,6 +1206,7 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.6", "Commandes du chat Twitch", ["💬 Commandes du chat Twitch (!discord, !reseaux…) réglées dans l'onglet Modération Twitch, avec {user} et {channel}"]],
   ["14.5", "Modération Twitch", ["🟣 Nouvel onglet Modération Twitch : connecte ta chaîne, le bot modère le chat (arnaques, mots interdits, liens, majuscules, répétitions)",
     "Journal des sanctions Twitch dans Discord, avec boutons Débannir / Timeout / Bannir", "Les bans et timeouts des modos Twitch sont aussi journalisés"]],
   ["14.4", "Ton IA, gratuitement", ["🔑 Branche ta propre IA (ChatGPT, Mistral, Gemini ou Claude) dans l'onglet Assistant IA : l'assistant devient gratuit",

@@ -46,7 +46,10 @@ OBJECT_LISTS = {
     "alerts.tiktok": (("login", "channel", "message"), ("login", "channel")),
     "alerts.rss": (("url", "channel", "message"), ("url", "channel")),
     "economy.shop": (("name", "price", "role", "description"), ("name",)),
+    "twitch_mod.commands": (("trigger", "response"), ("trigger", "response")),
 }
+OBJECT_LIST_MAX = {"twitch_mod.commands": 50}               # nombre d'éléments (25 par défaut)
+OBJECT_TEXT_MAX = {"twitch_mod.commands.response": 450}     # longueur d'un champ texte (300 par défaut)
 OBJECT_ID_FIELDS = {"channel", "role"}
 OBJECT_INT_FIELDS = {"price"}
 MAX_TEXT = 2000
@@ -92,7 +95,7 @@ FREE_OVERRIDES: dict[str, Any] = {
 
 # Limites selon la version (appliquées par les modules au moment de l'utilisation)
 LIMITS = {"tournament_players": (16, 64), "counters": (2, 5), "custom_commands": (5, 50), "role_menus": (2, 15),
-          "twitch_channels": (1, 5)}
+          "twitch_channels": (1, 5), "twitch_commands": (5, 50)}
 
 
 def limit_for(kind: str, premium: bool) -> int:
@@ -297,7 +300,7 @@ def _sanitize_object_list(path: str, value: Any) -> list[dict]:
         return []
     fields, required = OBJECT_LISTS[path]
     out = []
-    for item in value[:25]:
+    for item in value[:OBJECT_LIST_MAX.get(path, 25)]:
         if not isinstance(item, dict):
             continue
         clean: dict[str, Any] = {}
@@ -308,7 +311,7 @@ def _sanitize_object_list(path: str, value: Any) -> list[dict]:
             elif field in OBJECT_INT_FIELDS:
                 clean[field] = _clean_scalar(0, raw, "")
             else:
-                clean[field] = str(raw or "").strip()[:300]
+                clean[field] = str(raw or "").strip()[:OBJECT_TEXT_MAX.get(f"{path}.{field}", 300)]
         if all(clean[f] for f in required):
             out.append(clean)
     return out

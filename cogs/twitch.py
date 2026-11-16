@@ -93,6 +93,7 @@ class TwitchMod(commands.Cog):
         self.bot_user_id: int | None = None
         self.recent: dict[tuple[int, int], deque] = {}
         self._errors: dict[tuple[int, str], float] = {}
+        self.cooldowns: dict[tuple[int, str], float] = {}  # (chaîne, commande) -> dernière utilisation
 
     @property
     def db(self):
@@ -270,12 +271,18 @@ class TwitchMod(commands.Cog):
         bid = int(ev.get("broadcaster_user_id") or 0)
         guild = self._guild_for(bid)
         chatter = int(ev.get("chatter_user_id") or 0)
-        if guild is None or not chatter or chatter in (bid, self.bot_user_id):
+        if guild is None or not chatter or chatter == self.bot_user_id:
             return
         cfg = gconf(guild).get("twitch_mod", default={}) or {}
-        if twitch.exempt(ev.get("badges"), bool(cfg.get("exempt_subscribers"))):
-            return
         text = str((ev.get("message") or {}).get("text") or "")
+        # Le streamer, les modos et les VIP ne sont jamais sanctionnés, mais peuvent utiliser les commandes
+        if chatter != bid and not twitch.exempt(ev.get("badges"), bool(cfg.get("exempt_subscribers"))):
+            if await self.automod(guild, cfg, bid, chatter, ev, text):
+                return
+        await self.chat_command(guild, cfg, bid, ev, text)
+
+    async def automod(self, guild: discord.Guild, cfg: dict, bid: int, chatter: int, ev: dict, text: str) -> bool:
+        """Applique les règles. Renvoie True si le message a été sanctionné."""
         key, now = (bid, chatter), time.time()
         recent = self.recent.setdefault(key, deque(maxlen=10))
         while recent and now - recent[0][0] > RECENT_WINDOW:
@@ -286,6 +293,29 @@ class TwitchMod(commands.Cog):
             self.recent = {k: v for k, v in self.recent.items() if v and now - v[-1][0] < RECENT_WINDOW}
         if result:
             await self.punish(guild, cfg, bid, ev, *result)
+            return True
+        return False
+
+    async def chat_command(self, guild: discord.Guild, cfg: dict, bid: int, ev: dict, text: str) -> None:
+        """Commandes du chat (!discord…) : réponse du bot, avec un délai entre deux utilisations."""
+        if not text.startswith("!") or not self.api:
+            return
+        limit = limit_for("twitch_commands", is_premium(guild.id))
+        command = twitch.find_command(text, list(cfg.get("commands") or []), limit)
+        if command is None:
+            return
+        key = (bid, str(command.get("trigger")).lower().lstrip("!"))
+        cooldown = max(0, min(int(cfg.get("command_cooldown") or 0), 3600))
+        now = time.time()
+        if now - self.cooldowns.get(key, 0) < cooldown:
+            return
+        self.cooldowns[key] = now
+        user = str(ev.get("chatter_user_name") or ev.get("chatter_user_login") or "")
+        reply = twitch.fill_response(str(command.get("response")), user, self.logins.get(bid, ""))
+        try:
+            await self.api.send_message(bid, reply)
+        except TwitchError as exc:
+            await self.report_error(guild, bid, str(exc))
 
     async def punish(self, guild: discord.Guild, cfg: dict, bid: int, ev: dict, rule: str, action: str) -> None:
         assert self.api

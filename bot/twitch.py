@@ -201,6 +201,24 @@ def check_message(text: str, cfg: dict, recent: list[str]) -> tuple[str, str] | 
     return None
 
 
+def find_command(text: str, commands: list[dict], limit: int) -> dict | None:
+    """La commande du chat appelée par ce message (« !discord », majuscules ignorées), dans la limite du serveur."""
+    first = (text or "").strip().split(" ", 1)[0].lower()
+    if not first.startswith("!") or len(first) < 2:
+        return None
+    for command in (commands or [])[:limit]:
+        trigger = "!" + str(command.get("trigger") or "").strip().lower().lstrip("!")
+        if trigger == first and str(command.get("response") or "").strip():
+            return command
+    return None
+
+
+def fill_response(template: str, user: str, channel: str) -> str:
+    """Remplace {user} et {channel} ; le résultat tient dans un message Twitch (500 caractères)."""
+    text = str(template or "").replace("{user}", user).replace("{channel}", channel)
+    return text.strip()[:500]
+
+
 def exempt(badges: list[dict] | None, exempt_subscribers: bool) -> bool:
     """Le streamer, les modos et les VIP ne sont jamais sanctionnés (les abonnés si l'option est cochée)."""
     sets = {str(b.get("set_id")) for b in badges or [] if isinstance(b, dict)}
