@@ -735,6 +735,8 @@ const SECTIONS = [
   ] },
   { id: "ai", icon: "🤖", title: "Assistant IA", desc: "Le bot répond aux questions des membres à partir de tes règles et de ta FAQ (/ia, salon dédié ou mention), résume les tickets pour le staff (/resume-ticket) et rédige des annonces (/annonce-ia).", fields: [
     { path: "ai.enabled", type: "toggle", label: "Activer l'assistant IA" },
+    { path: "ai.mode", type: "select", label: "Ce que l'IA peut faire", options: [["friendly", "💬 Discussion libre : blagues, culture générale, jeux, et l'aide sur le serveur"], ["server", "📘 Serveur uniquement : ne répond qu'aux questions sur le serveur"]], help: "Dans les deux cas, l'IA n'invente jamais les règles, liens ou dates du serveur : elle utilise la FAQ ci-dessous." },
+    { path: "ai.personality", type: "textarea", label: "Personnalité (facultatif)", help: "Comment l'IA parle et se présente. 600 caractères max.", placeholder: "Tu es Cerbère, le chien de garde à trois têtes du serveur : drôle, un peu taquin, tu tutoies tout le monde et tu adores les jeux vidéo." },
     { path: "ai.knowledge", type: "textarea", label: "FAQ et informations du serveur", help: "Tout ce que l'IA doit savoir : horaires, liens, comment devenir staff, IP du serveur de jeu… 8 000 caractères max. Les règles (onglet Vérification) sont ajoutées automatiquement.", placeholder: "Q : Comment devenir modérateur ?\nR : Les candidatures ouvrent chaque mois, ouvre un ticket « Rejoindre la team »." },
     { path: "ai.channel", type: "channel", label: "Salon d'aide IA", help: "Le bot répond à toutes les questions posées dans ce salon. Facultatif.", empty: "— Aucun —" },
     { path: "ai.answer_mentions", type: "toggle", label: "Répondre quand on mentionne le bot", help: "Dans n'importe quel salon." },
@@ -1278,6 +1280,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["15.1", "Assistant IA plus vivant", ["💬 Mode discussion libre : blagues, culture générale, jeux (ou « serveur uniquement »)",
+    "🎭 Personnalité de l'IA réglable", "↩️ Réponds à un message de l'IA pour continuer la conversation"]],
   ["15.0", "Premium avec Patreon", ["💳 Abonne-toi sur Patreon (mensuel ou annuel), relie ton compte dans l'onglet 💎 Premium : le serveur passe Premium tout de suite",
     "🔁 Un abonnement = un serveur, à changer une fois par semaine", "📱 Barre du haut du panel corrigée sur téléphone"]],
   ["14.11", "Contact plus visible", ["📬 Nouvelle page Contact sur le site, accessible depuis le menu et l'accueil",

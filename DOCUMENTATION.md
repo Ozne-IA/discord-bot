@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 15.0.0 |
+| **Version** | 15.1.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 142 tests automatiques |
+| **Tests** | 144 tests automatiques |
 
 ---
 
@@ -595,7 +595,7 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 142 tests
+  pytest -q        # 144 tests
   ruff check .
   ```
 
@@ -713,10 +713,11 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 | v14.9 | **Shards** : le bot passe en mode AutoSharded (Discord choisit le nombre de shards, `SHARD_COUNT` pour le forcer), alertes si un shard reste coupé plus de 5 min ou dépasse 2 000 serveurs, shards visibles sur `/status`, `/ping` (shard du serveur), `/botinfo`, `/health` (`shards_down`, `?strict=1` en 503 si un shard est coupé) et envoyés à top.gg |
 | v14.10 | **Contact** : `/contact` (🐛 bug, 💡 idée, ✉️ autre → formulaire envoyé au propriétaire en MP ou dans `OWNER_ALERT_CHANNEL_ID`, même si `OWNER_ALERTS=off`, 1 message / 10 min par personne), e-mail public `cerbere.bot.discord@gmail.com` (modifiable avec `CONTACT_EMAIL`), lien **Contact** sur toutes les pages du site et dans le panel, rappel dans `/help` |
 | v14.11 | **Contact plus visible** : vraie page `/contact` (e-mail avec bouton Copier, 🐛 bug / 💡 idée / ✉️ autre avec sujet d'e-mail prérempli, rappel de `/contact` dans Discord), Contact dans le menu du site, encadré « Un souci ou une idée ? » et question dans la FAQ de l'accueil, rappel de `/contact` dans le message d'arrivée du bot et dans les messages d'erreur inattendue, message d'arrivée enfin traduit en anglais |
-| **v15.0 (actuelle)** | **Premium payé sur Patreon** (en attendant les abonnements Discord) : le membre paie sur Patreon (mensuel ou annuel), relie son compte dans le panel (OAuth, onglet 💎 Premium) et choisit le serveur Premium (1 abonnement = 1 serveur, changement tous les 7 jours). Webhook signé `POST /webhooks/patreon` (HMAC-MD5) + relecture de la liste des abonnés toutes les 6 h (jeton créateur rafraîchi et gardé chiffré) : le Premium s'arrête tout seul. Alertes au propriétaire, boutons Patreon dans `/premium` et les messages Premium, page Premium du site, CGU et confidentialité à jour, lien Patreon dans `/mes-donnees`. Lien direct `#/guild/<id>/premium` dans le panel. Barre du haut du panel corrigée sur téléphone |
+| v15.0 | **Premium payé sur Patreon** (en attendant les abonnements Discord) : le membre paie sur Patreon (mensuel ou annuel), relie son compte dans le panel (OAuth, onglet 💎 Premium) et choisit le serveur Premium (1 abonnement = 1 serveur, changement tous les 7 jours). Webhook signé `POST /webhooks/patreon` (HMAC-MD5) + relecture de la liste des abonnés toutes les 6 h (jeton créateur rafraîchi et gardé chiffré) : le Premium s'arrête tout seul. Alertes au propriétaire, boutons Patreon dans `/premium` et les messages Premium, page Premium du site, CGU et confidentialité à jour, lien Patreon dans `/mes-donnees`. Lien direct `#/guild/<id>/premium` dans le panel. Barre du haut du panel corrigée sur téléphone |
+| **v15.1 (actuelle)** | **Assistant IA plus vivant** : mode « 💬 Discussion libre » par défaut (blagues, culture générale, jeux, aide sur le serveur, contenu adapté à tous) ou « 📘 Serveur uniquement » (ancien comportement), champ **Personnalité** (600 caractères), l'IA se présente avec le nom du bot et comprend la suite quand on répond à son message. Les faits sur le serveur viennent toujours uniquement de la FAQ et des règles |
 
 **Idées pour la suite :** alertes Instagram/X, saisons de classement, découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 15.0.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 15.1.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

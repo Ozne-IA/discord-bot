@@ -117,6 +117,8 @@
   },
   "ai": {
     "enabled": false,
+    "mode": "friendly",
+    "personality": "",
     "channel": 0,
     "answer_mentions": true,
     "daily_limit": 100,

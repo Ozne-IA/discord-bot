@@ -33,6 +33,7 @@ COMMANDS_EN = {
     "Indique le gagnant d'un match en cours": "Set the winner of a current match", "Affiche le tableau d'un tournoi": "Show a tournament bracket",
     "Annule un tournoi": "Cancel a tournament",
     "Pose une question sur le serveur à l'assistant IA": "Ask the AI assistant a question about the server",
+    "Pose une question ou discute avec l'assistant IA": "Ask the AI assistant a question or chat with it",
     "Résumé IA du ticket actuel (visible par toi seul)": "AI summary of the current ticket (only visible to you)",
     "L'IA rédige une annonce, tu la relis puis tu la publies": "The AI drafts an announcement, you review and post it",
     "De quoi parle l'annonce (dates, infos importantes…)": "What the announcement is about (dates, key info…)",

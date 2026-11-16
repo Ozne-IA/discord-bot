@@ -36,7 +36,7 @@ ID_SCALARS = {"giveaways.manager_role", "birthdays.channel", "birthdays.role", "
               "twitch_mod.log_channel"}
 # Réglages à choix fermé
 TWITCH_ACTIONS = ("off", "delete", "timeout", "ban")
-CHOICES = {"general.language": ("fr", "en"),
+CHOICES = {"general.language": ("fr", "en"), "ai.mode": ("friendly", "server"),
            **{f"twitch_mod.{rule}_action": TWITCH_ACTIONS for rule in ("phishing", "links", "words", "caps", "repeat")}}
 # Listes d'objets : chemin -> (champs autorisés, champs obligatoires)
 OBJECT_LISTS = {
@@ -55,7 +55,7 @@ OBJECT_TEXT_MAX = {"twitch_mod.commands.response": 450, "tickets.saved_replies.n
 OBJECT_ID_FIELDS = {"channel", "role"}
 OBJECT_INT_FIELDS = {"price"}
 MAX_TEXT = 2000
-LONG_TEXT = {"ai.knowledge": 8000}  # textes autorisés à être plus longs
+LONG_TEXT = {"ai.knowledge": 8000, "ai.personality": 600}  # textes autorisés à être plus longs
 _HEX = re.compile(r"^#?[0-9a-fA-F]{6}$")
 
 # --------------------------------------------------------------------------- #
