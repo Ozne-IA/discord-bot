@@ -77,7 +77,6 @@ FREE_OVERRIDES: dict[str, Any] = {
     "engagement.weekly_quests": False,
     "economy.bank_interest": DEFAULTS["economy"]["bank_interest"],
     "panel_access": [],
-    "ai.enabled": False,
     "message_log.days": DEFAULTS["message_log"]["days"],
     "economy.currency_name": DEFAULTS["economy"]["currency_name"],
     "economy.currency_emoji": DEFAULTS["economy"]["currency_emoji"],

@@ -75,7 +75,7 @@ def test_faq_prompt_and_config():
     assert "English" in faq_system("X", [], "", "en")
     cfg = sanitize({"ai": {"knowledge": "a" * 9000, "daily_limit": "50", "channel": "123"}})
     assert len(cfg["ai"]["knowledge"]) == 8000 and cfg["ai"]["daily_limit"] == 50 and cfg["ai"]["channel"] == 123
-    assert FREE_OVERRIDES["ai.enabled"] is False and LIMITS["tournament_players"] == (16, 64)
+    assert "ai.enabled" not in FREE_OVERRIDES and LIMITS["tournament_players"] == (16, 64)
     assert "events" in ACCESS_GROUPS["community"][1] and "message_log" in ACCESS_GROUPS["moderation"][1]
     out = apply_restricted({"ai": {"enabled": False}}, {"ai": {"enabled": True}}, {"moderation"})
     assert out["ai"]["enabled"] is False

@@ -422,6 +422,18 @@ MIGRATIONS: list[str] = [
     );
     CREATE INDEX idx_bot_votes_user ON bot_votes (user_id, voted_at);
     """,
+    # v21 — clé d'IA propre à chaque serveur (chiffrée, jamais dans la configuration exportable)
+    """
+    CREATE TABLE ai_keys (
+        guild_id   INTEGER PRIMARY KEY,
+        provider   TEXT    NOT NULL,
+        model      TEXT    NOT NULL DEFAULT '',
+        key_enc    TEXT    NOT NULL,
+        key_hint   TEXT    NOT NULL,
+        updated_by INTEGER NOT NULL,
+        updated_at REAL    NOT NULL
+    );
+    """,
 ]
 
 

@@ -191,6 +191,15 @@ Variables facultatives (onglet **Variables** de Railway) :
 | `BACKUP_KEEP` | Nombre de sauvegardes gardées sur le volume (défaut 14) |
 | `PREMIUM_TRIAL_DAYS` | Durée de l'essai Premium gratuit (défaut 7, `0` = pas d'essai) |
 
+### 1 bis. (v14.4) Laisser chaque serveur brancher sa propre IA
+Les admins peuvent coller leur clé ChatGPT, Mistral, Gemini ou Claude dans le panel. Ces clés sont chiffrées avec un secret que toi seul connais :
+1. Sur ton PC, ouvre un terminal dans le dossier du bot et tape :
+   `venv\Scripts\python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`
+2. Copie la ligne affichée (44 caractères) dans la variable Railway **`AI_KEYS_SECRET`**, puis redéploie.
+3. ⚠️ **Garde aussi cette valeur ailleurs** (gestionnaire de mots de passe). Si elle change ou se perd, les clés déjà collées deviennent illisibles et les admins devront les recoller (rien d'autre n'est perdu).
+
+Sans `AI_KEYS_SECRET`, le panel affiche « le propriétaire du bot doit d'abord activer cette fonction ».
+
 ### 2. Être prévenu si Railway tombe (5 minutes, gratuit)
 Si Railway entier est en panne, le bot ne peut pas te prévenir lui-même. Un service extérieur le peut :
 1. Crée un compte gratuit sur <https://uptimerobot.com> (ou Better Stack).

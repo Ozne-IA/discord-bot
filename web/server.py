@@ -22,7 +22,8 @@ import aiohttp
 import discord
 from aiohttp import web
 
-from bot import diagnostic
+from bot import ai_keys, diagnostic, secrets_box
+from bot.ai_providers import PROVIDERS, ProviderError, list_models, valid_model
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
 from bot.config import DEFAULTS, LIMITS, PREMIUM_PATHS, deep_merge, gconf, limit_for, store
@@ -206,6 +207,9 @@ class Dashboard:
         r.add_post("/api/guilds/{guild_id}/template", self.api_template)
         r.add_post("/api/guilds/{guild_id}/import", self.api_import)
         r.add_post("/api/guilds/{guild_id}/trial", self.api_trial)
+        r.add_post("/api/guilds/{guild_id}/ai-key/models", self.api_ai_models)
+        r.add_put("/api/guilds/{guild_id}/ai-key", self.api_ai_key_save)
+        r.add_delete("/api/guilds/{guild_id}/ai-key", self.api_ai_key_delete)
         return app
 
     async def start(self) -> None:
@@ -622,6 +626,10 @@ class Dashboard:
                         "trial": await premium.trial_state(self.db, guild.id), "trial_days": trial_days(),
                         "twitch_enabled": bool(os.getenv("TWITCH_CLIENT_ID") and os.getenv("TWITCH_CLIENT_SECRET")),
                         "ai_ready": bool(os.getenv("ANTHROPIC_API_KEY", "").strip())},
+            # IA du serveur : jamais la clé, seulement le fournisseur, le modèle et la version masquée
+            "ai_key": await ai_keys.info(self.db, guild.id),
+            "ai_keys_ready": secrets_box.available(),
+            "ai_providers": [{"id": pid, "name": p["name"], "key_url": p["key_url"]} for pid, p in PROVIDERS.items()],
         }
 
     async def api_guild(self, request: web.Request) -> web.Response:
@@ -768,6 +776,78 @@ class Dashboard:
         return web.json_response({"entries": [
             {"user_id": str(r["user_id"]), "username": r["username"], "action": r["action"],
              "details": json.loads(r["details"] or "[]"), "at": r["created_at"]} for r in rows]})
+
+    # ------------------------------------------------------------------ #
+    #  IA du serveur (clé propre)
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _ai_body_key(body: dict) -> str:
+        key = str(body.get("key") or "").strip()
+        if len(key) > 400 or any(c.isspace() for c in key):
+            raise HTTPError(400, "Cette clé n'a pas le bon format : recopie-la sans espace.")
+        return key
+
+    async def _ai_key_for(self, guild: discord.Guild, provider: str, key: str) -> str:
+        """La clé à utiliser : celle envoyée, sinon celle déjà enregistrée (même fournisseur)."""
+        if key:
+            return key
+        try:
+            stored = await ai_keys.load(self.db, guild.id)
+        except secrets_box.SecretError as exc:
+            raise HTTPError(400, f"{exc} Recolle ta clé.") from None
+        if not stored or stored.provider != provider:
+            raise HTTPError(400, "Colle ta clé d'API.")
+        return stored.key
+
+    async def api_ai_models(self, request: web.Request) -> web.Response:
+        """Vérifie une clé et renvoie les modèles disponibles chez le fournisseur."""
+        self._check_csrf(request)
+        _, guild = await self._require_guild(request, "full")
+        body = await request.json()
+        provider = str(body.get("provider") or "")
+        if provider not in PROVIDERS:
+            raise HTTPError(400, "Choisis un fournisseur.")
+        key = await self._ai_key_for(guild, provider, self._ai_body_key(body))
+        assert self._http
+        try:
+            models = await list_models(provider, key, self._http)
+        except ProviderError as exc:
+            raise HTTPError(400, str(exc)) from None
+        if not models:
+            raise HTTPError(400, "La clé marche, mais aucun modèle de discussion n'est disponible sur ce compte.")
+        return web.json_response({"ok": True, "models": models})
+
+    async def api_ai_key_save(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        if not secrets_box.available():
+            raise HTTPError(503, "Le propriétaire du bot doit d'abord configurer AI_KEYS_SECRET.")
+        body = await request.json()
+        provider = str(body.get("provider") or "")
+        model = str(body.get("model") or "").strip()
+        if provider not in PROVIDERS:
+            raise HTTPError(400, "Choisis un fournisseur.")
+        if not valid_model(model):
+            raise HTTPError(400, "Choisis un modèle (bouton « Tester la clé »).")
+        new_key = self._ai_body_key(body)
+        key = await self._ai_key_for(guild, provider, new_key)
+        assert self._http
+        try:
+            models = await list_models(provider, key, self._http)
+        except ProviderError as exc:
+            raise HTTPError(400, str(exc)) from None
+        if models and model not in models:
+            raise HTTPError(400, "Ce modèle n'est pas disponible avec cette clé.")
+        info = await ai_keys.save(self.db, guild.id, provider, key, model, session["user_id"])
+        await self._audit(guild.id, session, "ai_key", [PROVIDERS[provider]["name"], model])
+        return web.json_response({"ok": True, "ai_key": info})
+
+    async def api_ai_key_delete(self, request: web.Request) -> web.Response:
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        await ai_keys.delete(self.db, guild.id)
+        await self._audit(guild.id, session, "ai_key_delete", [])
+        return web.json_response({"ok": True})
 
     async def api_trial(self, request: web.Request) -> web.Response:
         """Démarre l'essai Premium gratuit (une fois par serveur, admins seulement)."""

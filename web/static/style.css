@@ -128,7 +128,7 @@ footer.site { text-align: center; color: var(--muted); padding: 30px; border-top
 .field .help { color: var(--muted); font-size: 13px; }
 .field .control { min-width: 0; }
 
-input[type=text], input[type=number], textarea, select {
+input[type=text], input[type=number], input[type=password], textarea, select {
   width: 100%; background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 9px;
   padding: 10px 12px; font: inherit; outline: none; transition: border-color .15s;
 }

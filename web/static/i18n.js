@@ -262,6 +262,22 @@ const EN = {
   "Modération, automod, anti-raid, signalements": "Moderation, automod, anti-raid, reports", "Événements, tournois (16 joueurs), suggestions": "Events, tournaments (16 players), suggestions",
   "Panel web complet avec assistant de démarrage": "Full web dashboard with setup wizard",
   "Assistant IA, résumé de tickets, rédaction d'annonces": "AI assistant, ticket summaries, announcement drafting",
+  "IA incluse, sans clé à fournir (FAQ, résumé de tickets, annonces)": "Built-in AI, no key needed (FAQ, ticket summaries, announcements)",
+  "Assistant IA avec ta propre clé (ChatGPT, Mistral, Gemini, Claude)": "AI assistant with your own key (ChatGPT, Mistral, Gemini, Claude)",
+  "IA incluse, sans clé": "Built-in AI, no key",
+  "✅ Clé testée : choisis le modèle puis enregistre": "✅ Key tested: pick the model, then save",
+  "🔑 Ton IA": "🔑 Your AI", "Fournisseur": "Provider", "Clé d'API": "API key", "Modèle": "Model",
+  "🔌 Tester la clé": "🔌 Test the key", "💾 Enregistrer cette IA": "💾 Save this AI", "🗑️ Supprimer ma clé": "🗑️ Delete my key",
+  "Créer ma clé →": "Create my key →", "Colle ta clé d'API ici": "Paste your API key here",
+  "Aucune IA branchée pour l'instant.": "No AI connected yet.",
+  "Branche ta propre IA : c'est gratuit avec le bot, tu paies seulement ton fournisseur (certains ont une offre gratuite). Ta clé est chiffrée et n'est jamais réaffichée.":
+    "Connect your own AI: it's free with the bot, you only pay your provider (some have a free tier). Your key is encrypted and never shown again.",
+  "Ne la partage jamais ailleurs. Un abonnement (ChatGPT Plus, Claude Pro…) ne suffit pas : il faut une clé d'API.":
+    "Never share it anywhere else. A subscription (ChatGPT Plus, Claude Pro…) is not enough: you need an API key.",
+  "Les modèles « mini », « flash » ou « small » sont plus rapides et moins chers.": "\"mini\", \"flash\" or \"small\" models are faster and cheaper.",
+  "Aucune clé : l'IA incluse avec Premium répond. Tu peux brancher la tienne à la place.": "No key: the AI included with Premium answers. You can connect yours instead.",
+  "Pour que l'assistant réponde, branche ton IA ci-dessous (gratuit) ou passe en 💎 Premium pour l'IA incluse.":
+    "For the assistant to answer, connect your AI below (free) or upgrade to 💎 Premium for the built-in AI.",
   "Alertes Twitch, YouTube, Kick, TikTok et RSS": "Twitch, YouTube, Kick, TikTok and RSS alerts", "Giveaways, sondages, casino, quête de la semaine": "Giveaways, polls, casino, weekly quest",
   "Personnalisation complète, carte de bienvenue, captcha": "Full customization, welcome card, captcha",
   "Anti-nuke, accès au panel par rôle, statistiques 90 jours": "Anti-nuke, role-based dashboard access, 90-day statistics",
@@ -368,6 +384,8 @@ const EN = {
     "The log is disabled: turn it on in the Moderation tab (nothing is recorded while it's off).",
   "Aucun message dans le journal pour ces filtres.": "No message in the log for these filters.",
   "Répond aux questions des membres avec ta FAQ, résume les tickets et rédige tes annonces.": "Answers members' questions with your FAQ, summarizes tickets and drafts your announcements.",
+  "IA incluse": "Built-in AI",
+  "Sans clé à fournir : répond aux questions avec ta FAQ, résume les tickets et rédige tes annonces.": "No key needed: answers questions with your FAQ, summarizes tickets and drafts your announcements.",
   // --- v12 : engagement, banque, alertes, accès au panel, staff
   "Succès & quêtes": "Achievements & quests",
   "Fait revenir les membres : 19 succès à débloquer (badges + récompenses), 3 quêtes par jour, séries d'activité. Commandes : /profil, /succes, /quetes.":

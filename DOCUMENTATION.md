@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 14.3.0 |
+| **Version** | 14.4.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 99 tests automatiques |
+| **Tests** | 107 tests automatiques |
 
 ---
 
@@ -359,9 +359,9 @@ Les limites gratuites sont appliquées par le bot. Au-delà, les éléments en t
 | `/tournoi creer <nom> [places] [recompense] [salon]` | Tournoi avec bouton d'inscription |
 | `/tournoi lancer` · `resultat <gagnant>` · `voir` · `annuler` | Tableau tiré au sort (exempts si besoin), le staff indique les gagnants, le champion reçoit la récompense |
 | Parrainage (panel → Modmail & invitations) | L'inviteur reçoit de l'argent quand son invité est resté X jours |
-| `/ia <question>` · salon d'aide IA · mention du bot (💎) | Réponse de l'IA à partir des règles et de la FAQ écrite dans le panel ; limite de questions par jour réglable |
-| `/resume-ticket` (💎, staff) | Résumé du ticket (demande, ce qui a été fait, où on en est, prochaine étape), visible par toi seul |
-| `/annonce-ia <sujet> [ton]` (💎) | Brouillon d'annonce avec aperçu et bouton **Publier ici** |
+| `/ia <question>` · salon d'aide IA · mention du bot | Réponse de l'IA à partir des règles et de la FAQ écrite dans le panel ; limite de questions par jour réglable. Gratuit avec la propre clé du serveur (v14.4), 💎 avec l'IA incluse |
+| `/resume-ticket` (staff) | Résumé du ticket (demande, ce qui a été fait, où on en est, prochaine étape), visible par toi seul |
+| `/annonce-ia <sujet> [ton]` | Brouillon d'annonce avec aperçu et bouton **Publier ici** |
 | Clic droit sur un message → Applications → **Signaler le message** | Le staff reçoit le signalement avec 🗑️ Supprimer / 🔇 Muter 10 min / ✅ Traité |
 | `/signalements` | Signalements en attente |
 | Ralenti automatique (panel → Automod) | Trop de messages en 10 s → mode lent quelques minutes, retiré tout seul |
@@ -460,7 +460,8 @@ Chaque serveur est **gratuit** par défaut. Premium s'achète **par serveur**, a
 | 🗳️ Récompense de vote top.gg (/vote) | ✅ | ✅ |
 | 🏆 Tournois à élimination directe (/tournoi) | 16 joueurs | 64 joueurs |
 | 🤝 Récompense de parrainage (invité resté X jours) | ✅ | ✅ |
-| 🤖 Assistant IA : FAQ (/ia, salon, mention), /resume-ticket, /annonce-ia | ❌ | ✅ |
+| 🤖 Assistant IA avec **sa propre clé** (ChatGPT, Mistral, Gemini ou Claude) : FAQ, /resume-ticket, /annonce-ia | ✅ | ✅ |
+| 🤖 IA incluse, sans clé (Claude, payée par le propriétaire du bot) | ❌ | ✅ |
 | 🚩 Signalements par clic droit + /signalements | ✅ | ✅ |
 | 🐢 Ralenti automatique des salons qui s'emballent | ✅ | ✅ |
 | 🕵️ Journal des messages modifiés/supprimés dans le panel | 7 jours | jusqu'à 30 jours |
@@ -590,7 +591,7 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 99 tests
+  pytest -q        # 107 tests
   ruff check .
   ```
 
@@ -693,10 +694,12 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 
 | v14.2 | **Fiabilité et croissance** : sauvegarde automatique chaque nuit envoyée au propriétaire, alertes en message privé (erreurs, plantages, serveurs, abonnements), `/health?strict=1` pour la surveillance externe, site protégé (limite de requêtes par adresse, politique CSP, HSTS), **top.gg** (nombre de serveurs + `/vote` récompensé), 🎁 **essai Premium gratuit** de 7 jours avec rappels |
 
-| **v14.3 (actuelle)** | **Règles de Discord** : rôle Membre donné automatiquement quand le nouveau venu accepte l'écran de règles de Discord |
+| v14.3 | **Règles de Discord** : rôle Membre donné automatiquement quand le nouveau venu accepte l'écran de règles de Discord |
+
+| **v14.4 (actuelle)** | **Ton IA** : chaque serveur branche sa propre IA (ChatGPT, Mistral, Gemini ou Claude) dans le panel, gratuitement ; clé chiffrée (`AI_KEYS_SECRET`), jamais réaffichée ni exportée, réservée aux admins ; l'IA incluse reste 💎 |
 
 **Idées pour la suite :** alertes Instagram/X, ménage des données des serveurs quittés, préparation du sharding (2 500 serveurs), découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.3.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.4.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

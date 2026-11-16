@@ -720,7 +720,7 @@ const SECTIONS = [
     { path: "events.manager_role", type: "role", label: "Rôle gestionnaire", help: "Peut créer et gérer les événements et tournois (en plus de « Gérer le serveur »)." },
     { path: "events.reminder_minutes", type: "number", label: "Rappel avant le début (minutes)", help: "Les inscrits sont mentionnés dans le salon de l'événement.", min: 1, max: 1440 },
   ] },
-  { id: "ai", icon: "🤖", title: "Assistant IA", premium: true, desc: "Le bot répond aux questions des membres à partir de tes règles et de ta FAQ (/ia, salon dédié ou mention), résume les tickets pour le staff (/resume-ticket) et rédige des annonces (/annonce-ia).", fields: [
+  { id: "ai", icon: "🤖", title: "Assistant IA", desc: "Le bot répond aux questions des membres à partir de tes règles et de ta FAQ (/ia, salon dédié ou mention), résume les tickets pour le staff (/resume-ticket) et rédige des annonces (/annonce-ia).", fields: [
     { path: "ai.enabled", type: "toggle", label: "Activer l'assistant IA" },
     { path: "ai.knowledge", type: "textarea", label: "FAQ et informations du serveur", help: "Tout ce que l'IA doit savoir : horaires, liens, comment devenir staff, IP du serveur de jeu… 8 000 caractères max. Les règles (onglet Vérification) sont ajoutées automatiquement.", placeholder: "Q : Comment devenir modérateur ?\nR : Les candidatures ouvrent chaque mois, ouvre un ticket « Rejoindre la team »." },
     { path: "ai.channel", type: "channel", label: "Salon d'aide IA", help: "Le bot répond à toutes les questions posées dans ce salon. Facultatif.", empty: "— Aucun —" },
@@ -995,7 +995,8 @@ function renderMessageLog() {
 
 const AUDIT_LABELS = { config: "a modifié la configuration", autocreate: "a lancé la création automatique",
   panels: "a publié les panneaux", send: "a envoyé un message", rolemenu: "a publié un menu de rôles", import: "a importé une sauvegarde",
-  template: "a appliqué un modèle", trial: "a démarré l'essai Premium" };
+  template: "a appliqué un modèle", trial: "a démarré l'essai Premium", ai_key: "a branché une IA",
+  ai_key_delete: "a supprimé la clé IA" };
 // (l'onglet Statistiques est visible avec l'accès « Statistiques » ou « Modération »)
 
 function renderAudit() {
@@ -1025,7 +1026,7 @@ const PREMIUM_FEATURES = [
   ["💥", "Sécurité avancée", "Anti-nuke, lockdown automatique en cas de raid, alertes au propriétaire."],
   ["🎵", "Alertes Kick, TikTok et RSS", "Lives Kick et TikTok, nouvelles vidéos TikTok, articles de n'importe quel site."],
   ["🏆", "Quête de la semaine", "Une grosse quête chaque semaine en plus des 3 quêtes du jour, et intérêts de banque réglables."],
-  ["🤖", "Assistant IA", "Répond aux questions des membres avec ta FAQ, résume les tickets et rédige tes annonces."],
+  ["🤖", "IA incluse", "Sans clé à fournir : répond aux questions avec ta FAQ, résume les tickets et rédige tes annonces."],
   ["👮", "Accès au panel par rôle", "Tes modérateurs gèrent leur partie du panel sans avoir « Gérer le serveur »."],
 ];
 
@@ -1060,8 +1061,87 @@ function renderPremium() {
     trial, cta)];
 }
 
+
+// ------------------------------------------------------------------ IA du serveur (clé propre)
+const AI_KEY_HELP = {
+  openai: "platform.openai.com → API keys → Create new secret key. Il faut ajouter un peu de crédit (l'abonnement ChatGPT Plus ne suffit pas).",
+  mistral: "console.mistral.ai → API Keys → Create new key. Une offre gratuite (limitée) existe.",
+  gemini: "aistudio.google.com → Get API key → Create API key. Une offre gratuite (limitée) existe.",
+  anthropic: "platform.claude.com → API Keys → Create Key. Il faut ajouter un peu de crédit (l'abonnement Claude Pro ne suffit pas).",
+};
+function renderAiKey() {
+  const g = state.guild;
+  if (!fullAccess()) return null;
+  const current = g.ai_key;
+  const providers = g.ai_providers || [];
+  const ui = { provider: current ? current.provider : (providers[0] || {}).id, models: [], model: current ? current.model : "" };
+  const box = h("div", { class: "panel ai-key" });
+  const nameOf = (id) => (providers.find((p) => p.id === id) || {}).name || id;
+  const busy = (btn, on) => { btn.disabled = on; };
+  const draw = () => {
+    const keyInput = h("input", { type: "password", autocomplete: "off", spellcheck: "false",
+      placeholder: ui.pendingKey ? "✅ Clé testée : choisis le modèle puis enregistre" : current && current.provider === ui.provider ?`Clé enregistrée (${current.key_hint}) — laisse vide pour la garder` : "Colle ta clé d'API ici" });
+    const providerSelect = h("select", { onchange: (e) => { ui.provider = e.target.value; ui.models = []; ui.model = ""; draw(); } },
+      providers.map((p) => h("option", { value: p.id, selected: p.id === ui.provider }, p.name)));
+    const modelSelect = ui.models.length
+      ? h("select", { onchange: (e) => { ui.model = e.target.value; } },
+          ui.models.map((m) => h("option", { value: m, selected: m === ui.model }, m)))
+      : null;
+    const testBtn = h("button", { class: "btn ghost", onclick: async () => {
+      busy(testBtn, true);
+      try {
+        const r = await api("POST", `/api/guilds/${g.guild.id}/ai-key/models`, { provider: ui.provider, key: keyInput.value.trim() });
+        ui.models = r.models;
+        if (!ui.models.includes(ui.model)) ui.model = ui.models[0];
+        ui.pendingKey = keyInput.value.trim();
+        toast(`✅ Clé valide : ${r.models.length} modèle(s) disponible(s)`);
+        draw();
+      } catch (err) { toast(err.message, "err"); busy(testBtn, false); }
+    } }, "🔌 Tester la clé");
+    const saveBtn = ui.models.length ? h("button", { class: "btn primary", onclick: async () => {
+      busy(saveBtn, true);
+      try {
+        const r = await api("PUT", `/api/guilds/${g.guild.id}/ai-key`, { provider: ui.provider, key: ui.pendingKey || keyInput.value.trim(), model: ui.model });
+        g.ai_key = r.ai_key; ui.pendingKey = ""; ui.models = [];
+        toast("✅ IA enregistrée : elle répond maintenant sur ce serveur");
+        renderContent();
+      } catch (err) { toast(err.message, "err"); busy(saveBtn, false); }
+    } }, "💾 Enregistrer cette IA") : null;
+    const deleteBtn = current ? h("button", { class: "btn ghost", onclick: async () => {
+      if (!confirm("Supprimer la clé IA de ce serveur ? L'assistant ne pourra plus répondre avec ton IA.")) return;
+      try { await api("DELETE", `/api/guilds/${g.guild.id}/ai-key`); g.ai_key = null; toast("Clé supprimée"); renderContent(); }
+      catch (err) { toast(err.message, "err"); }
+    } }, "🗑️ Supprimer ma clé") : null;
+    const keyUrl = (providers.find((p) => p.id === ui.provider) || {}).key_url;
+    box.replaceChildren(...[
+      h("h2", {}, "🔑 Ton IA"),
+      h("p", { class: "desc" }, "Branche ta propre IA : c'est gratuit avec le bot, tu paies seulement ton fournisseur (certains ont une offre gratuite). Ta clé est chiffrée et n'est jamais réaffichée."),
+      !g.ai_keys_ready ? h("div", { class: "notice warn" }, "Le propriétaire du bot doit d'abord activer cette fonction (variable AI_KEYS_SECRET).") : null,
+      current
+        ? h("div", { class: "notice" }, `✅ IA active : ${nameOf(current.provider)} · modèle ${current.model} · clé ${current.key_hint}`)
+        : h("div", { class: "notice" }, g.premium.active && g.premium.ai_ready
+          ? "Aucune clé : l'IA incluse avec Premium répond. Tu peux brancher la tienne à la place."
+          : "Aucune IA branchée pour l'instant."),
+      h("div", { class: "field" }, h("div", {}, h("label", { class: "title" }, "Fournisseur"),
+        h("div", { class: "help" }, AI_KEY_HELP[ui.provider] || "", " ", keyUrl ? h("a", { href: keyUrl, target: "_blank", rel: "noopener" }, "Créer ma clé →") : null)),
+        h("div", { class: "control" }, providerSelect)),
+      h("div", { class: "field" }, h("div", {}, h("label", { class: "title" }, "Clé d'API"),
+        h("div", { class: "help" }, "Ne la partage jamais ailleurs. Un abonnement (ChatGPT Plus, Claude Pro…) ne suffit pas : il faut une clé d'API.")),
+        h("div", { class: "control" }, keyInput)),
+      modelSelect ? h("div", { class: "field" }, h("div", {}, h("label", { class: "title" }, "Modèle"),
+        h("div", { class: "help" }, "Les modèles « mini », « flash » ou « small » sont plus rapides et moins chers.")),
+        h("div", { class: "control" }, modelSelect)) : null,
+      h("div", { class: "row" }, testBtn, saveBtn, deleteBtn)].filter(Boolean));
+    translateDom(box);
+  };
+  draw();
+  return box;
+}
+
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.4", "Ton IA, gratuitement", ["🔑 Branche ta propre IA (ChatGPT, Mistral, Gemini ou Claude) dans l'onglet Assistant IA : l'assistant devient gratuit",
+    "Ta clé est chiffrée et n'est jamais réaffichée", "💎 Premium garde l'IA incluse, sans clé"]],
   ["14.3", "Règles de Discord", ["Rôle Membre donné automatiquement quand un nouveau venu accepte l'écran de règles de Discord (onglet Vérification)"]],
   ["14.2", "Essai Premium, votes et fiabilité", ["🎁 Essai Premium gratuit de 7 jours (une fois par serveur)",
     "🗳️ /vote : vote pour le bot sur top.gg et gagne de la monnaie (récompense réglable dans Économie)",
@@ -1399,13 +1479,14 @@ function renderContent() {
         ? h("div", { class: "notice warn" }, "💎 Module Premium : tu peux le préparer, il s'activera avec Premium. ",
             h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.section = "premium"; renderGuild(); } }, "Voir Premium →"))
         : null,
-      section.id === "ai" && !g.premium.ai_ready
-        ? h("div", { class: "notice warn" }, "L'assistant IA n'est pas encore activé sur ce bot : le propriétaire doit ajouter une clé d'API Claude (ANTHROPIC_API_KEY).")
+      section.id === "ai" && !g.ai_key && !(g.premium.active && g.premium.ai_ready)
+        ? h("div", { class: "notice warn" }, "Pour que l'assistant réponde, branche ton IA ci-dessous (gratuit) ou passe en 💎 Premium pour l'IA incluse.")
         : null,
       section.id === "alerts" && !g.premium.twitch_enabled
         ? h("div", { class: "notice warn" }, "Les alertes Twitch ne sont pas encore activées sur ce bot (le propriétaire doit ajouter les clés Twitch). YouTube fonctionne.")
         : null,
-      section.fields.map(field))];
+      section.fields.map(field)),
+      section.id === "ai" ? renderAiKey() : null];
   }
 
   holder.replaceChildren(...[content].flat(Infinity).filter((c) => c !== null && c !== undefined && c !== false));
