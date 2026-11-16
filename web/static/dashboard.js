@@ -659,6 +659,7 @@ const SECTIONS = [
     { path: "roles.unverified", type: "role", label: "Rôle Non vérifié", help: "Donné automatiquement à l'arrivée." },
     { path: "roles.member", type: "role", label: "Rôle Membre", help: "Donné quand la personne clique sur « J'accepte »." },
     { path: "verification.rules", type: "lines", label: "Règles", help: "Une règle par ligne.", placeholder: "Respecte tout le monde.", preview: "rules" },
+    { path: "verification.discord_rules", type: "toggle", label: "Rôle quand on accepte les règles de Discord", help: "Si l'écran de règles de Discord est activé (Paramètres du serveur → Accès / Sécurité), le bot donne le rôle Membre dès que le nouveau venu accepte. Pas besoin du bouton « J'accepte ». Ignoré si le captcha est activé (le captcha reste obligatoire)." },
     { path: "verification.captcha", type: "toggle", label: "Captcha anti-robot", help: "Avant d'obtenir le rôle, il faut recopier un code affiché dans une image." },
   ] },
   { id: "roles", icon: "🔔", title: "Notifications", desc: "Un menu où chacun choisit les sujets pour lesquels il veut être mentionné.", fields: [
@@ -1061,6 +1062,7 @@ function renderPremium() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.3", "Règles de Discord", ["Rôle Membre donné automatiquement quand un nouveau venu accepte l'écran de règles de Discord (onglet Vérification)"]],
   ["14.2", "Essai Premium, votes et fiabilité", ["🎁 Essai Premium gratuit de 7 jours (une fois par serveur)",
     "🗳️ /vote : vote pour le bot sur top.gg et gagne de la monnaie (récompense réglable dans Économie)",
     "Site mieux protégé contre les abus", "Sauvegardes automatiques chaque nuit"]],

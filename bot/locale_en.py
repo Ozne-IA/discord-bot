@@ -468,5 +468,9 @@ MESSAGES_EN: dict[str, str] = {
     "⏳ Plus qu'un jour d'essai Premium": "⏳ One day of Premium trial left",
     "💎 Essai Premium terminé": "💎 Premium trial ended",
     "Archive .gz abîmée.": "Damaged .gz archive.",
+    "{} a accepté les règles de Discord.": "{} accepted the Discord rules.",
+    "Impossible de donner {} à {} : place mon rôle au-dessus de ce rôle.":
+        "Couldn't give {} to {}: move my role above that role.",
+    "⚠️ Vérification": "⚠️ Verification",
     "Sauvegarde trop grosse une fois décompressée.": "Backup too large once decompressed.",
 }

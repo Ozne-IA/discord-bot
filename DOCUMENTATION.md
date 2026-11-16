@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 14.2.0 |
+| **Version** | 14.3.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 96 tests automatiques |
+| **Tests** | 99 tests automatiques |
 
 ---
 
@@ -491,6 +491,8 @@ YouTube, Kick, TikTok et RSS fonctionnent sans rien faire. Pour Twitch : sur <ht
 ### ✅ Vérification (`cogs/verification.py`)
 Le bouton est **persistant** : il fonctionne encore après un redémarrage. Un clic donne « Membre », retire « Non vérifié », confirme en message privé et écrit un log.
 
+**Règles de Discord (v14.3)** : si le serveur utilise l'écran de règles de Discord (Paramètres du serveur → Accès / Sécurité → « les membres doivent accepter les règles »), l'option **Rôle quand on accepte les règles de Discord** (panel → Vérification) donne « Membre » et retire « Non vérifié » dès que le nouveau venu accepte, sans passer par le bouton. Gratuit. Si le captcha 💎 est activé, l'option est ignorée : le captcha reste obligatoire.
+
 ### 🔔 Notifications (`cogs/roles.py`)
 Les choix du menu viennent de la config du serveur. Un seul enregistrement de vue sert tous les serveurs : le bot retrouve les bons rôles au moment du clic.
 
@@ -588,7 +590,7 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 96 tests
+  pytest -q        # 99 tests
   ruff check .
   ```
 
@@ -689,10 +691,12 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 
 | v14.1 | **Prêt pour Railway** : guide [RAILWAY.md](RAILWAY.md), commande **/restore** pour déménager les données, droits du volume réglés automatiquement, police installée dans l'image Docker pour les images générées, commandes du propriétaire cachées sur la page Commandes |
 
-| **v14.2 (actuelle)** | **Fiabilité et croissance** : sauvegarde automatique chaque nuit envoyée au propriétaire, alertes en message privé (erreurs, plantages, serveurs, abonnements), `/health?strict=1` pour la surveillance externe, site protégé (limite de requêtes par adresse, politique CSP, HSTS), **top.gg** (nombre de serveurs + `/vote` récompensé), 🎁 **essai Premium gratuit** de 7 jours avec rappels |
+| v14.2 | **Fiabilité et croissance** : sauvegarde automatique chaque nuit envoyée au propriétaire, alertes en message privé (erreurs, plantages, serveurs, abonnements), `/health?strict=1` pour la surveillance externe, site protégé (limite de requêtes par adresse, politique CSP, HSTS), **top.gg** (nombre de serveurs + `/vote` récompensé), 🎁 **essai Premium gratuit** de 7 jours avec rappels |
+
+| **v14.3 (actuelle)** | **Règles de Discord** : rôle Membre donné automatiquement quand le nouveau venu accepte l'écran de règles de Discord |
 
 **Idées pour la suite :** alertes Instagram/X, ménage des données des serveurs quittés, préparation du sharding (2 500 serveurs), découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.2.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.3.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

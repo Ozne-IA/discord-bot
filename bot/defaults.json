@@ -43,7 +43,8 @@
       "Utilise les bons salons.",
       "Écoute le staff."
     ],
-    "captcha": false
+    "captcha": false,
+    "discord_rules": false
   },
   "tickets": {
     "max_open_per_user": 1,

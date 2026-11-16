@@ -42,6 +42,27 @@ async def grant_member(interaction: discord.Interaction) -> None:
     await send_log(interaction.guild, embeds.success(f"{member.mention} s'est vérifié(e).", "✅ Vérification"))
 
 
+async def grant_on_rules(member: discord.Member) -> bool:
+    """Donne le rôle Membre (et retire Non vérifié) après l'écran de règles de Discord. Renvoie True si fait."""
+    guild = member.guild
+    cfg = gconf(guild)
+    member_role = guild.get_role(cfg.role_id("member"))
+    if member_role is None or member_role in member.roles:
+        return False
+    unverified = guild.get_role(cfg.role_id("unverified"))
+    try:
+        await member.add_roles(member_role, reason="Règles de Discord acceptées")
+        if unverified and unverified in member.roles:
+            await member.remove_roles(unverified, reason="Règles de Discord acceptées")
+    except discord.HTTPException:
+        await send_log(guild, embeds.error(
+            f"Impossible de donner {member_role.mention} à {member.mention} : place mon rôle au-dessus de ce rôle.",
+            "⚠️ Vérification"))
+        return False
+    await send_log(guild, embeds.success(f"{member.mention} a accepté les règles de Discord.", "✅ Vérification"))
+    return True
+
+
 class CaptchaModal(discord.ui.Modal, title="Vérification"):
     code = discord.ui.TextInput(label="Recopie le code de l'image", min_length=4, max_length=8,
                                 placeholder="Ex : A7K3P")
@@ -139,6 +160,17 @@ class Verification(commands.Cog):
 
     async def cog_load(self) -> None:
         self.bot.add_view(VerifyView())
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
+        """Écran de règles de Discord accepté (le membre n'est plus « en attente ») : rôle Membre."""
+        if not (before.pending and not after.pending):
+            return
+        guild = after.guild
+        cfg = gconf(guild)
+        if not cfg.get("verification", "discord_rules", default=False) or cfg.get("verification", "captcha", default=False):
+            return  # option désactivée, ou captcha obligatoire (il passe alors par le bouton du bot)
+        await grant_on_rules(after)
 
     @app_commands.command(name="setup_verify", description="Envoie le panneau règles + vérification ici")
     @app_commands.default_permissions(administrator=True)
