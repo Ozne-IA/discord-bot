@@ -1,0 +1,244 @@
+{
+  "general": {
+    "language": "fr"
+  },
+  "brand": {
+    "color": "#5865F2",
+    "footer": ""
+  },
+  "channels": {
+    "welcome": 0,
+    "goodbye": 0,
+    "logs": 0,
+    "mod_logs": 0,
+    "level_up": 0,
+    "ticket_category": 0,
+    "ticket_logs": 0
+  },
+  "panels": {
+    "verify": 0,
+    "notifications": 0,
+    "tickets": 0
+  },
+  "roles": {
+    "unverified": 0,
+    "member": 0,
+    "staff": 0,
+    "notifications": {},
+    "level_roles": {}
+  },
+  "welcome": {
+    "enabled": true,
+    "image": true,
+    "send_dm": true,
+    "message": "Bienvenue {mention} sur **{server}** ! Tu es notre {count}e membre 🎉",
+    "dm_message": "Salut {name} ! Bienvenue sur **{server}**. Pense à lire les règles et à te vérifier pour accéder au serveur.",
+    "goodbye_message": "**{name}** a quitté le serveur. Nous sommes maintenant {count}."
+  },
+  "verification": {
+    "rules": [
+      "Respecte tous les membres.",
+      "Pas de spam, de pub ou de flood.",
+      "Pas de contenu NSFW, choquant ou illégal.",
+      "Utilise les bons salons.",
+      "Écoute le staff."
+    ],
+    "captcha": false
+  },
+  "tickets": {
+    "max_open_per_user": 1,
+    "inactive_close_hours": 72,
+    "transcripts": true,
+    "feedback": true,
+    "types": {
+      "support": {
+        "label": "Support",
+        "emoji": "🛠️",
+        "description": "Une question ou un problème"
+      },
+      "report": {
+        "label": "Signalement",
+        "emoji": "🚨",
+        "description": "Signaler un membre"
+      },
+      "partnership": {
+        "label": "Partenariat",
+        "emoji": "🤝",
+        "description": "Proposer un partenariat"
+      },
+      "other": {
+        "label": "Autre",
+        "emoji": "💬",
+        "description": "Autre demande"
+      }
+    }
+  },
+  "leveling": {
+    "enabled": true,
+    "xp_min": 15,
+    "xp_max": 25,
+    "cooldown_seconds": 60,
+    "booster_multiplier": 1.5,
+    "ignored_channels": [],
+    "level_up_message": "🎉 {mention} passe au **niveau {level}** !",
+    "voice_enabled": true,
+    "voice_xp_per_minute": 10,
+    "rank_card": true
+  },
+  "giveaways": {
+    "manager_role": 0,
+    "emoji": "🎉"
+  },
+  "alerts": {
+    "twitch": [],
+    "youtube": [],
+    "kick": [],
+    "tiktok": [],
+    "rss": []
+  },
+  "engagement": {
+    "enabled": true,
+    "achievements": true,
+    "quests": true,
+    "weekly_quests": true,
+    "quest_reward": 150,
+    "weekly_reward": 1500,
+    "announce": true,
+    "channel": 0
+  },
+  "events": {
+    "enabled": true,
+    "manager_role": 0,
+    "reminder_minutes": 15
+  },
+  "ai": {
+    "enabled": false,
+    "channel": 0,
+    "answer_mentions": true,
+    "daily_limit": 100,
+    "knowledge": ""
+  },
+  "reports": {
+    "enabled": true,
+    "channel": 0
+  },
+  "message_log": {
+    "enabled": false,
+    "days": 7
+  },
+  "panel_access": [],
+  "economy": {
+    "enabled": true,
+    "currency_name": "pièces",
+    "currency_emoji": "🪙",
+    "daily_amount": 100,
+    "daily_streak_bonus": 10,
+    "work_min": 20,
+    "work_max": 80,
+    "work_cooldown_minutes": 60,
+    "bank_enabled": true,
+    "bank_interest": 1.0,
+    "bank_max": 1000000,
+    "shop": []
+  },
+  "modmail": {
+    "enabled": false,
+    "anonymous_staff": false,
+    "greeting": "📬 Ton message a été transmis au staff de **{server}**. Réponds ici pour continuer la conversation ; le staff te répondra dans ce message privé."
+  },
+  "invites": {
+    "enabled": true,
+    "channel": 0,
+    "message": "📨 {mention} a rejoint grâce à **{inviter}** ({count} invitation(s)).",
+    "referral_reward": 0,
+    "referral_days": 7
+  },
+  "temp_voice": {
+    "enabled": true,
+    "creator_channel": 0,
+    "category": 0,
+    "name_template": "🔊 Salon de {name}",
+    "default_limit": 0
+  },
+  "suggestions": {
+    "enabled": true,
+    "channel": 0
+  },
+  "starboard": {
+    "enabled": true,
+    "channel": 0,
+    "emoji": "⭐",
+    "threshold": 3
+  },
+  "counters": [],
+  "custom_commands": [],
+  "role_menus": [],
+  "scheduled": [],
+  "games": {
+    "enabled": true,
+    "max_bet": 10000,
+    "quiz_reward": 50,
+    "guess_reward": 100
+  },
+  "birthdays": {
+    "enabled": true,
+    "channel": 0,
+    "role": 0,
+    "message": "🎂 Joyeux anniversaire {mention} ! Toute l'équipe de **{server}** te souhaite une super journée 🎉",
+    "timezone": "Europe/Paris"
+  },
+  "reminders": {
+    "enabled": true
+  },
+  "moderation": {
+    "warn_expiry_days": 30,
+    "escalation": {
+      "3": {
+        "action": "timeout",
+        "minutes": 60
+      },
+      "5": {
+        "action": "kick",
+        "minutes": 0
+      },
+      "7": {
+        "action": "ban",
+        "minutes": 0
+      }
+    }
+  },
+  "automod": {
+    "enabled": true,
+    "block_phishing": true,
+    "allowed_domains": [],
+    "block_invites": true,
+    "max_mentions": 5,
+    "spam_messages": 6,
+    "spam_seconds": 5,
+    "banned_words": [],
+    "exempt_roles": [],
+    "auto_slowmode": true,
+    "slowmode_messages": 15,
+    "slowmode_seconds": 5,
+    "slowmode_minutes": 5
+  },
+  "anti_raid": {
+    "enabled": true,
+    "min_account_age_days": 7,
+    "max_joins": 8,
+    "joins_window_seconds": 10,
+    "action": "kick",
+    "auto_lockdown": true,
+    "whitelist": []
+  },
+  "anti_nuke": {
+    "enabled": true,
+    "window_seconds": 10,
+    "max_channel_deletes": 3,
+    "max_role_deletes": 3,
+    "max_bans": 3,
+    "max_channel_creates": 5,
+    "action": "ban",
+    "whitelist": []
+  }
+}

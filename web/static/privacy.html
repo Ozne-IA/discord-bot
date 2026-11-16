@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Politique de confidentialité</title>
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#5865f2">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .legal { max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+    .legal h1 { font-size: 32px; }
+    .legal h2 { font-size: 20px; margin-top: 34px; }
+    .legal p, .legal li { color: #c9cedb; }
+    .legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+    .legal th, .legal td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .legal th { color: var(--text); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img class="bot-avatar" alt=""><span class="bot-name">Bot</span></a>
+    <div class="spacer"></div>
+    <a class="btn ghost small" href="/terms">Conditions d'utilisation</a>
+  </header>
+
+  <main class="legal">
+    <h1>Politique de confidentialité</h1>
+    <p class="muted">Dernière mise à jour : 15 novembre 2026</p>
+
+    <p>Cette politique explique quelles données <b class="bot-name">le bot</b> (le « Bot ») et son panel web (le « Panel ») collectent, pourquoi, combien de temps elles sont gardées et comment en demander la suppression.</p>
+
+    <h2>1. Données collectées</h2>
+    <table>
+      <tr><th>Donnée</th><th>Pourquoi</th><th>Durée de conservation</th></tr>
+      <tr><td>Identifiants Discord (serveur, salons, rôles, membres)</td><td>Faire fonctionner les modules configurés par les administrateurs du serveur</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Configuration du serveur (messages, règles, réglages)</td><td>Appliquer les choix faits dans le Panel</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Points d'expérience, niveau et nombre de messages</td><td>Système de niveaux (/rank, classement)</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Sanctions, raisons et notes du staff</td><td>Historique de modération (/history)</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Informations sur les tickets (numéro, type, sujet, dates)</td><td>Gestion et statistiques des tickets</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Économie : solde, série de /daily, objets achetés</td><td>Monnaie et boutique du serveur</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Date d'anniversaire (jour et mois, sans l'année)</td><td>Souhaiter ton anniversaire, si tu l'as enregistrée toi-même</td><td>Jusqu'à <code>/anniversaire retirer</code></td></tr>
+      <tr><td>Rappels (texte, date, salon)</td><td>T'envoyer tes rappels</td><td>Supprimés dès leur envoi</td></tr>
+      <tr><td>Statistiques du serveur (nombre d'arrivées, départs, messages, minutes en vocal par jour)</td><td>Graphiques du Panel ; ce sont des totaux, sans contenu ni identité</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Historique du Panel (qui a modifié quel réglage)</td><td>Transparence pour les admins du serveur</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>XP gagnée par jour</td><td>Classements de la semaine et du mois</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Participations aux giveaways et votes aux sondages (ID Discord, choix)</td><td>Tirer les gagnants, compter les votes</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Chaînes Twitch / YouTube suivies et dernière vidéo ou live annoncé</td><td>Alertes configurées par le serveur</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Invitations : qui a invité qui, code utilisé, dates d'arrivée et de départ</td><td>Suivi des invitations et récompenses de parrainage</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Succès débloqués, progression des quêtes, séries d'activité (jours, sans contenu), argent en banque</td><td>Succès, quêtes, profil et banque</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Inscriptions aux événements et tournois, résultats des matchs</td><td>Organiser les événements et tournois</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Signalements : message signalé (texte), auteur, personne qui signale, raison, décision du staff</td><td>Permettre au staff de traiter les signalements</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Journal des messages (si le serveur l'active) : texte des messages modifiés ou supprimés, auteur, salon</td><td>Permettre au staff de consulter les messages modifiés ou supprimés</td><td>7 jours par défaut, 30 maximum, puis effacement automatique</td></tr>
+      <tr><td>Nombre de questions posées à l'assistant IA par jour (total du serveur)</td><td>Limiter l'usage de l'IA</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Abonnement Premium du serveur (fourni par Discord)</td><td>Activer les fonctionnalités Premium</td><td>Tant que l'abonnement existe</td></tr>
+      <tr><td>Événements de sécurité (automod, anti-raid, anti-nuke)</td><td>Protéger le serveur et permettre au staff de vérifier les actions</td><td>Tant que le serveur utilise le Bot</td></tr>
+      <tr><td>Connexion au Panel : ID, pseudo, avatar Discord, liste de tes serveurs, jeton d'accès Discord</td><td>T'identifier et n'afficher que les serveurs que tu gères</td><td>7 jours maximum (ou jusqu'à la déconnexion)</td></tr>
+    </table>
+
+    <h2>2. Contenu des messages</h2>
+    <p>Le Bot lit le contenu des messages uniquement pour : attribuer de l'XP, appliquer les filtres de l'automod choisis par le serveur, et publier dans le salon de logs du serveur les messages supprimés ou modifiés. <b>Le contenu des messages n'est pas enregistré dans la base de données du Bot</b>, sauf : la raison d'une infraction automod, un message que tu signales (pour le staff), et les messages modifiés ou supprimés si le serveur a activé le journal des messages (effacés automatiquement après 7 jours par défaut, 30 au maximum).</p>
+    <p><b>Assistant IA (si le serveur l'active)</b> : la question que tu poses à l'assistant (commande <code>/ia</code>, salon d'aide IA ou mention du Bot), la conversation d'un ticket dont le staff demande un résumé, ou le sujet d'une annonce à rédiger, sont envoyés à Anthropic (fournisseur du modèle d'IA Claude) pour générer la réponse, avec les règles et la FAQ écrites par les admins du serveur. Le Bot ne conserve pas ces textes. Anthropic les traite selon sa propre politique de confidentialité (anthropic.com/legal/privacy).</p>
+    <p>À la fermeture d'un ticket, un transcript (copie de la conversation du ticket) est envoyé dans le salon de logs choisi par le serveur et en message privé à la personne qui a ouvert le ticket. Il n'est pas conservé par le Bot.</p>
+
+    <p>Le captcha de vérification est généré à la demande et gardé en mémoire 5 minutes maximum ; il n'est jamais enregistré. Les paiements Premium sont traités entièrement par Discord : le Bot ne voit ni ne stocke aucune donnée bancaire.</p>
+
+    <h2>3. Ce que le Panel ne fait pas</h2>
+    <ul>
+      <li>Il ne demande que les autorisations Discord « identify » et « guilds » : il ne peut ni lire tes messages, ni écrire, ni agir en ton nom.</li>
+      <li>Aucune donnée n'est vendue, louée ou partagée avec des tiers à des fins commerciales ou publicitaires.</li>
+      <li>Aucun cookie publicitaire ou de pistage : le Panel n'utilise qu'un cookie de session nécessaire à la connexion.</li>
+    </ul>
+
+    <h2>4. Qui a accès aux données</h2>
+    <p>Les données d'un serveur sont visibles par les membres autorisés de ce serveur (via les commandes du Bot ou le Panel, réservé aux personnes ayant la permission « Gérer le serveur ») et par le propriétaire du Bot pour la maintenance. Les données sont hébergées sur le serveur qui fait tourner le Bot et transitent par Discord et Cloudflare, qui fournissent le service.</p>
+
+    <h2>5. Tes droits et la suppression</h2>
+    <p>Tu peux demander l'accès, la correction ou la suppression de tes données. Un propriétaire de serveur peut demander la suppression de toutes les données de son serveur. Contact : <span class="contact">…</span>.</p>
+    <p>Retirer le Bot d'un serveur arrête toute nouvelle collecte pour ce serveur. Se déconnecter du Panel supprime immédiatement ta session.</p>
+
+    <h2>6. Sécurité</h2>
+    <p>Les échanges avec le Panel sont chiffrés (HTTPS). Chaque action du Panel vérifie en direct que tu as le droit de gérer le serveur concerné. Les secrets du Bot ne sont jamais exposés publiquement.</p>
+
+    <h2>7. Modifications</h2>
+    <p>Cette politique peut évoluer ; la date en haut de page indique la dernière version. En cas de changement important, il sera annoncé sur le serveur de support ou dans le Panel.</p>
+
+    <p class="muted" style="margin-top:40px">En utilisant le Bot, tu acceptes aussi les <a href="https://discord.com/terms" target="_blank" rel="noopener">Conditions d'utilisation de Discord</a> et sa <a href="https://discord.com/privacy" target="_blank" rel="noopener">Politique de confidentialité</a>.</p>
+  </main>
+
+  <footer class="site"><a href="/">Page d'accueil</a> · <a href="/terms">Conditions d'utilisation</a> · <a href="/privacy">Confidentialité</a></footer>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/legal.js"></script>
+</body>
+</html>

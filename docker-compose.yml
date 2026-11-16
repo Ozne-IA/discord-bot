@@ -1,0 +1,24 @@
+# Hébergement sur un VPS : bot + panel web + tunnel Cloudflare (HTTPS automatique, aucun port à ouvrir).
+#   1. cp .env.example .env  et remplis-le (dont CLOUDFLARE_TUNNEL_TOKEN)
+#   2. docker compose up -d --build
+services:
+  bot:
+    build: .
+    container_name: discord-bot
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data            # base de données, logs et sauvegardes
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: discord-bot-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - bot

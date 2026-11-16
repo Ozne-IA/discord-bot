@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Premium — __BOT_NAME__</title>
+  <meta name="description" content="Comparaison de la version gratuite et de la version Premium du bot.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="__BOT_NAME__ Premium">
+  <meta property="og:description" content="Ce que la version Premium ajoute à ton serveur Discord : IA, alertes, giveaways, personnalisation complète et plus.">
+  <meta property="og:image" content="__ORIGIN__/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#5865f2">
+  <link rel="icon" href="/favicon.png">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img id="bot-avatar-small" alt=""><span class="bot-name">__BOT_NAME__</span></a>
+    <nav class="site-nav"><a href="/#fonctions">Fonctions</a><a href="/commands">Commandes</a><a href="/premium" class="on">Premium</a><a href="/status">Statut</a></nav>
+    <div class="spacer"></div>
+    <a class="btn primary small" href="/dashboard">Panel</a>
+  </header>
+
+  <main class="section">
+    <h2>💎 Gratuit ou Premium</h2>
+    <p class="sub">La version gratuite suffit à la plupart des serveurs. Premium s'active par serveur et débloque les modules avancés, sans redémarrage.</p>
+
+    <div class="price-cards">
+      <div class="price"><h3>Gratuit</h3><p class="muted">Pour toujours, sans carte bancaire.</p><ul>
+        <li>Accueil, vérification, tickets, modmail</li><li>Niveaux, succès, quêtes, économie, mini-jeux</li>
+        <li>Modération, automod, anti-raid, signalements</li><li>Événements, tournois (16 joueurs), suggestions</li>
+        <li>Panel web complet avec assistant de démarrage</li></ul>
+        <a class="btn ghost" id="invite-btn" href="#">➕ Ajouter à Discord</a></div>
+      <div class="price best"><h3>💎 Premium</h3><p class="muted">Abonnement mensuel par serveur, géré par Discord.</p><ul>
+        <li>Assistant IA, résumé de tickets, rédaction d'annonces</li><li>Alertes Twitch, YouTube, Kick, TikTok et RSS</li>
+        <li>Giveaways, sondages, casino, quête de la semaine</li><li>Personnalisation complète, carte de bienvenue, captcha</li>
+        <li>Anti-nuke, accès au panel par rôle, statistiques 90 jours</li></ul>
+        <a class="btn primary" id="subscribe" href="/dashboard">💎 Passer à Premium</a>
+        <p class="muted" id="subscribe-note" style="font-size:13px;margin:10px 0 0">Dans Discord : tape <code>/premium</code> sur ton serveur.</p></div>
+    </div>
+
+    <table class="compare">
+      <thead><tr><th>Fonction</th><th>Gratuit</th><th>💎 Premium</th></tr></thead>
+      <tbody>
+        <tr class="cat"><td colspan="3">👋 Accueil</td></tr>
+        <tr><td>Bienvenue, au revoir, message privé</td><td>Textes par défaut</td><td>Textes personnalisés</td></tr>
+        <tr><td>Carte de bienvenue en image</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Vérification par bouton</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Captcha anti-robot</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Menus de rôles</td><td>2</td><td>15</td></tr>
+        <tr><td>Suivi des invitations et parrainage</td><td>✅</td><td>✅</td></tr>
+        <tr class="cat"><td colspan="3">🎫 Support</td></tr>
+        <tr><td>Tickets, modmail, priorités</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Formulaire par type de ticket</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Transcript HTML et avis ⭐</td><td>❌</td><td>✅</td></tr>
+        <tr class="cat"><td colspan="3">🎉 Communauté</td></tr>
+        <tr><td>Niveaux et classement</td><td>✅</td><td>✅</td></tr>
+        <tr><td>XP vocal, carte de rang, classements semaine / mois</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Succès, quêtes du jour, séries</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Quête de la semaine</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Économie et banque</td><td>Intérêts 1 %</td><td>Taux réglable</td></tr>
+        <tr><td>Boutique, nom et emoji de la monnaie</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Mini-jeux</td><td>✅</td><td>✅ + casino</td></tr>
+        <tr><td>Événements</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Tournois</td><td>16 joueurs</td><td>64 joueurs</td></tr>
+        <tr><td>Giveaways et sondages</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Rappels actifs par membre</td><td>3</td><td>25</td></tr>
+        <tr class="cat"><td colspan="3">🛡️ Modération</td></tr>
+        <tr><td>Automod, liens d'arnaque, anti-raid, signalements</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Anti-nuke et lockdown automatique</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Journal des messages</td><td>7 jours</td><td>30 jours</td></tr>
+        <tr class="cat"><td colspan="3">📺 Outils</td></tr>
+        <tr><td>Alertes Twitch, YouTube, Kick, TikTok, RSS</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Messages programmés</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Compteurs</td><td>2</td><td>5</td></tr>
+        <tr><td>Commandes perso</td><td>5</td><td>50</td></tr>
+        <tr><td>Assistant IA (FAQ, résumé, annonces)</td><td>❌</td><td>✅</td></tr>
+        <tr class="cat"><td colspan="3">⚙️ Panel</td></tr>
+        <tr><td>Couleur et pied de page des messages</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Statistiques en graphiques</td><td>7 jours</td><td>7, 30 et 90 jours</td></tr>
+        <tr><td>Accès au panel par rôle</td><td>❌</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer class="site"><a href="/">Page d'accueil</a> · <a href="/commands">Commandes</a> · <a href="/status">Statut</a> · <a href="/terms">Conditions d'utilisation</a> · <a href="/privacy">Confidentialité</a></footer>
+
+  <script src="/static/i18n.js"></script>
+  <script>
+    fetch("/api/public").then(r => r.ok ? r.json() : Promise.reject()).then(info => {
+      document.querySelectorAll(".bot-name").forEach(el => el.textContent = info.name);
+      if (info.avatar) document.getElementById("bot-avatar-small").src = info.avatar;
+      if (info.invite) document.getElementById("invite-btn").href = info.invite;
+      if (info.store_url) {
+        const btn = document.getElementById("subscribe");
+        btn.href = info.store_url; btn.target = "_blank"; btn.rel = "noopener";
+      }
+    }).catch(() => {});
+  </script>
+</body>
+</html>

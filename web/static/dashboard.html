@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de configuration</title>
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#5865f2">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img id="bot-avatar" alt=""><span id="bot-name">Panel</span></a>
+    <div class="spacer"></div>
+    <div class="user-chip" id="user-chip" hidden>
+      <img id="user-avatar" alt=""><span class="uname" id="user-name"></span>
+      <button class="btn ghost small" id="logout">Déconnexion</button>
+    </div>
+  </header>
+
+  <main class="container" id="app"><div class="spinner"></div></main>
+
+  <div class="savebar" id="savebar">
+    <span class="txt">⚠️ Tu as des modifications non enregistrées.</span>
+    <button class="btn ghost small" id="reset">Annuler</button>
+    <button class="btn primary small" id="save" title="Ctrl+S">Enregistrer <span class="kbd">Ctrl+S</span></button>
+  </div>
+
+  <script src="/static/i18n.js"></script>
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

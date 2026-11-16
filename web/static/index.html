@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__BOT_NAME__ — Bot Discord tout-en-un</title>
+  <meta name="description" content="Accueil, vérification, tickets, niveaux, économie, mini-jeux, modération, anti-raid, alertes et assistant IA pour ton serveur Discord, configurable depuis un panel web.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="__BOT_NAME__ — Bot Discord tout-en-un">
+  <meta property="og:description" content="Tout ton serveur Discord géré par un seul bot, configurable en quelques clics depuis un panel web. Gratuit, avec une version Premium.">
+  <meta property="og:image" content="__ORIGIN__/og.png">
+  <meta property="og:url" content="__ORIGIN__/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#5865f2">
+  <link rel="icon" href="/favicon.png">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img id="bot-avatar-small" alt=""><span class="bot-name">__BOT_NAME__</span></a>
+    <nav class="site-nav"><a href="#fonctions">Fonctions</a><a href="/commands">Commandes</a><a href="/premium">Premium</a><a href="/status">Statut</a></nav>
+    <div class="spacer"></div>
+    <a class="btn primary small" href="/dashboard" id="top-dashboard">Panel</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <img class="avatar" id="bot-avatar" alt="">
+      <h1><span class="bot-name">__BOT_NAME__</span> gère ton serveur pour toi</h1>
+      <p class="lead">Accueil, tickets, niveaux, économie, mini-jeux, modération, anti-raid, alertes de live et assistant IA. Tout se règle en quelques clics depuis un panel web, sans une ligne de code.</p>
+      <div class="actions">
+        <a class="btn primary big" id="invite-btn" href="#">➕ Ajouter à Discord</a>
+        <a class="btn ghost big" href="/dashboard">⚙️ Ouvrir le panel</a>
+      </div>
+      <div class="stats">
+        <div><b id="stat-guilds">–</b><span>serveurs</span></div>
+        <div><b id="stat-members">–</b><span>membres</span></div>
+        <div><b id="stat-commands">–</b><span>commandes</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="fonctions">
+      <h2>Tout ce qu'il faut, dans un seul bot</h2>
+      <p class="sub">Active seulement ce dont tu as besoin : chaque module se règle séparément dans le panel.</p>
+      <div class="groups">
+        <div class="group"><h3>👋 Accueil des nouveaux</h3><ul>
+          <li><b>Bienvenue</b> avec carte en image, message privé et au revoir</li>
+          <li><b>Vérification</b> par bouton, avec captcha anti-robot 💎</li>
+          <li><b>Rôles</b> de notifications et menus de rôles à boutons</li>
+          <li><b>Invitations</b> suivies, classement et parrainage récompensé</li></ul></div>
+        <div class="group"><h3>🛡️ Modération et sécurité</h3><ul>
+          <li><b>Avertissements</b> qui expirent, sanctions automatiques, casier</li>
+          <li><b>Automod</b> : spam, mots interdits, liens d'arnaque (+20 000 connus)</li>
+          <li><b>Anti-raid et anti-nuke</b>, ralenti automatique des salons</li>
+          <li><b>Signalements</b> par clic droit et journal des messages</li></ul></div>
+        <div class="group"><h3>🎫 Support</h3><ul>
+          <li><b>Tickets</b> par type, avec formulaire 💎, priorités et transcript</li>
+          <li><b>Modmail</b> : les membres écrivent au bot en privé</li>
+          <li><b>Avis</b> ⭐ après chaque ticket et statistiques</li>
+          <li><b>Résumé IA</b> d'un ticket pour le staff 💎</li></ul></div>
+        <div class="group"><h3>🎉 Communauté</h3><ul>
+          <li><b>Niveaux</b>, carte de rang, rôles de récompense</li>
+          <li><b>Succès, quêtes</b> du jour et séries d'activité</li>
+          <li><b>Économie</b> avec banque, boutique 💎 et <b>mini-jeux</b></li>
+          <li><b>Événements, tournois</b>, giveaways, sondages, anniversaires</li></ul></div>
+        <div class="group"><h3>📺 Créateurs et outils</h3><ul>
+          <li><b>Alertes</b> Twitch, YouTube, Kick, TikTok et RSS 💎</li>
+          <li><b>Messages programmés</b> 💎 et envoi depuis le panel</li>
+          <li><b>Compteurs</b>, commandes perso, vocaux temporaires</li>
+          <li><b>Suggestions</b> avec votes et starboard</li></ul></div>
+        <div class="group"><h3>🤖 Panel web et IA</h3><ul>
+          <li><b>Assistant de démarrage</b> et modèles prêts à l'emploi</li>
+          <li><b>Aperçu en direct</b> des messages, boutons Tester</li>
+          <li><b>Statistiques</b>, historique, accès par rôle 💎</li>
+          <li><b>Assistant IA</b> qui répond avec ta FAQ 💎, en français et en anglais</li></ul></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Prêt en 3 étapes</h2>
+      <div class="steps">
+        <div class="step"><h3>Ajoute le bot</h3><p>Clique sur « Ajouter à Discord » et choisis ton serveur.</p></div>
+        <div class="step"><h3>Lance l'assistant</h3><p>Dans le panel, choisis le type de serveur (gaming, communauté, pro, streamer) et les fonctions voulues.</p></div>
+        <div class="step"><h3>C'est prêt</h3><p>Le bot crée les salons et les rôles qui manquent et publie les panneaux. Tout reste modifiable ensuite.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Questions fréquentes</h2>
+      <div class="faq">
+        <details><summary>Le bot est-il gratuit ?</summary><p>Oui : la grande majorité des fonctions sont gratuites. La version Premium, par serveur, ajoute des modules avancés. <a href="/premium">Voir la comparaison</a>.</p></details>
+        <details><summary>Faut-il savoir coder ?</summary><p>Non. Tout se règle depuis le panel web, avec un aperçu en direct de chaque message et un assistant qui configure le serveur pour toi.</p></details>
+        <details><summary>Quelles permissions demande le bot ?</summary><p>Il demande les droits d'administrateur pour pouvoir créer les salons et rôles, modérer et protéger le serveur. Pense à placer son rôle en haut de la liste des rôles.</p></details>
+        <details><summary>Le bot parle-t-il anglais ?</summary><p>Oui. La langue se choisit pour chaque serveur dans le panel, et le site et le panel ont un bouton FR / EN.</p></details>
+        <details><summary>Que deviennent mes données ?</summary><p>Le bot ne garde que ce qui est nécessaire aux modules activés, et le contenu des messages n'est pas enregistré sauf options précises. Tout est détaillé dans la <a href="/privacy">politique de confidentialité</a>.</p></details>
+        <details><summary>Le bot est-il en ligne ?</summary><p>L'état du bot en direct (en ligne, latence) est affiché sur la page <a href="/status">Statut</a>.</p></details>
+      </div>
+    </section>
+
+    <section class="cta">
+      <a class="btn primary big" id="invite-btn-2" href="#">➕ Ajouter à Discord</a>
+    </section>
+  </main>
+
+  <footer class="site">Version <span id="version">–</span> · <a href="/commands">Commandes</a> · <a href="/premium">Premium</a> · <a href="/status">Statut</a> · <a href="/dashboard">Panel de configuration</a> · <a href="/terms">Conditions d'utilisation</a> · <a href="/privacy">Confidentialité</a></footer>
+
+  <script src="/static/i18n.js"></script>
+  <script>
+    fetch("/api/public").then(r => r.ok ? r.json() : Promise.reject()).then(info => {
+      document.querySelectorAll(".bot-name").forEach(el => el.textContent = info.name);
+      document.title = info.name + (LANG === "en" ? " — All-in-one Discord bot" : " — Bot Discord tout-en-un");
+      for (const id of ["bot-avatar", "bot-avatar-small"]) if (info.avatar) document.getElementById(id).src = info.avatar;
+      const fmt = (n) => n.toLocaleString(LANG === "en" ? "en-GB" : "fr-FR");
+      document.getElementById("stat-guilds").textContent = fmt(info.guilds);
+      document.getElementById("stat-members").textContent = fmt(info.members);
+      document.getElementById("stat-commands").textContent = info.commands || "100+";
+      document.getElementById("version").textContent = info.version;
+      if (info.invite) for (const id of ["invite-btn", "invite-btn-2"]) document.getElementById(id).href = info.invite;
+      if (info.logged_in) document.getElementById("top-dashboard").textContent = "Mes serveurs";
+    }).catch(() => {});
+  </script>
+</body>
+</html>

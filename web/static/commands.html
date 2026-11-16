@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Commandes — __BOT_NAME__</title>
+  <meta name="description" content="Toutes les commandes slash du bot, avec recherche et filtre par module.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Commandes de __BOT_NAME__">
+  <meta property="og:description" content="Toutes les commandes du bot, classées par module.">
+  <meta property="og:image" content="__ORIGIN__/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#5865f2">
+  <link rel="icon" href="/favicon.png">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img id="bot-avatar-small" alt=""><span class="bot-name">__BOT_NAME__</span></a>
+    <nav class="site-nav"><a href="/#fonctions">Fonctions</a><a href="/commands" class="on">Commandes</a><a href="/premium">Premium</a><a href="/status">Statut</a></nav>
+    <div class="spacer"></div>
+    <a class="btn primary small" href="/dashboard">Panel</a>
+  </header>
+
+  <main class="section">
+    <h2>📚 Toutes les commandes</h2>
+    <p class="sub" id="count">Chargement…</p>
+    <div class="cmd-tools"><input type="text" id="search" placeholder="Rechercher une commande (ex : ticket, banque, warn)…" autocomplete="off"></div>
+    <div class="filters" id="filters"></div>
+    <div class="cmd-list" id="list"><div class="spinner"></div></div>
+  </main>
+
+  <footer class="site"><a href="/">Page d'accueil</a> · <a href="/premium">Premium</a> · <a href="/status">Statut</a> · <a href="/dashboard">Panel de configuration</a></footer>
+
+  <script src="/static/i18n.js"></script>
+  <script>
+    "use strict";
+    let all = [], module = "", query = "";
+    const el = (tag, attrs = {}, ...kids) => {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) if (k === "class") n.className = v; else n.setAttribute(k, v);
+      for (const c of kids) if (c != null) n.append(c instanceof Node ? c : document.createTextNode(String(c)));
+      return n;
+    };
+    const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    function draw() {
+      const q = norm(query);
+      const shown = all.filter((c) => (!module || c.module === module)
+        && (!q || norm(c.name + " " + c.description + " " + c.en + " " + c.module).includes(q)));
+      document.getElementById("list").replaceChildren(...(shown.length ? shown.map((c) => el("div", { class: "cmd" },
+        el("code", {}, c.name + (c.options.length ? " " + c.options.map((o) => `<${o}>`).join(" ") : "")),
+        el("p", {}, LANG === "en" ? c.en : c.description),
+        el("div", { class: "tags" }, el("span", { class: "tag" }, translateText(c.module)),
+          c.premium ? el("span", { class: "tag p" }, "💎 Premium") : null,
+          c.staff ? el("span", { class: "tag s" }, translateText("Staff")) : null)))
+        : [el("p", { class: "muted" }, translateText("Aucune commande ne correspond."))]));
+      document.getElementById("count").textContent = LANG === "en"
+        ? `${shown.length} command(s) out of ${all.length}. Commands marked Staff are only visible to members with the right permissions.`
+        : `${shown.length} commande(s) sur ${all.length}. Celles marquées Staff ne sont visibles que par les membres qui ont les permissions.`;
+    }
+    function filters() {
+      const modules = [...new Set(all.map((c) => c.module))].sort((a, b) => a.localeCompare(b));
+      const box = document.getElementById("filters");
+      const make = (value, label) => {
+        const b = el("button", { class: value === module ? "on" : "" }, label);
+        b.addEventListener("click", () => { module = value; filters(); draw(); });
+        return b;
+      };
+      box.replaceChildren(make("", translateText("Tout")), ...modules.map((m) => make(m, translateText(m))));
+    }
+    document.getElementById("search").addEventListener("input", (e) => { query = e.target.value; draw(); });
+    fetch("/api/commands").then((r) => r.json()).then((data) => { all = data.commands; filters(); draw(); })
+      .catch(() => { document.getElementById("list").textContent = translateText("Impossible de charger les commandes."); });
+    fetch("/api/public").then((r) => r.ok ? r.json() : Promise.reject()).then((info) => {
+      document.querySelectorAll(".bot-name").forEach((n) => n.textContent = info.name);
+      if (info.avatar) document.getElementById("bot-avatar-small").src = info.avatar;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

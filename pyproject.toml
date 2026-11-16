@@ -1,0 +1,17 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B"]
+ignore = ["E731"]
+
+[tool.ruff.lint.per-file-ignores]
+"bot/i18n.py" = ["E501"]  # dictionnaires de traduction : une phrase par ligne
+"bot/locale_en.py" = ["E501"]
+"bot/templates.py" = ["E501"]  # textes des modèles
