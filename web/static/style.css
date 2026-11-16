@@ -367,3 +367,18 @@ input[type=datetime-local] { background: var(--bg-2); color: var(--text); border
 .warn-text { color: var(--warn); }
 .twitch-channel { flex-wrap: wrap; padding: 8px 0; border-top: 1px solid var(--line); }
 .twitch-channel > a { font-weight: 600; flex: 0 0 auto; }
+
+/* Contact */
+.contact-mail { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  margin: 0 auto 8px; font-size: 18px; }
+.contact-mail b { word-break: break-all; }
+.contact-cards { padding-bottom: 20px; }
+.contact-cards .feature { display: flex; flex-direction: column; }
+.contact-cards .feature p { flex: 1; margin-bottom: 16px; }
+.contact-discord { margin: 0 24px; }
+.contact-banner { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; max-width: 780px; margin: 0 auto;
+  background: var(--card); border: 1px solid var(--brand); border-radius: var(--radius); padding: 22px; }
+.contact-banner .icon { font-size: 34px; }
+.contact-banner .grow { flex: 1; min-width: 200px; }
+.contact-banner h3 { margin: 0 0 4px; }
+.contact-banner p { margin: 0; color: var(--muted); font-size: 14px; }

@@ -122,6 +122,7 @@ class Welcome(commands.Cog):
         text = ("Merci de m'avoir ajouté ! 🎉\n\n"
                 + (f"**Configure-moi en 2 minutes sur le panel web :**\n{url}\n\n" if url else "")
                 + "Commandes utiles : `/help`, `/check_config`.\n"
+                "📬 Un souci ou une idée ? Tape `/contact` : ton message arrive directement au créateur du bot.\n"
                 "⚠️ Place mon rôle **au-dessus** des rôles que je dois gérer (Paramètres du serveur → Rôles).")
         target = guild.system_channel
         if target is None or not target.permissions_for(guild.me).send_messages:

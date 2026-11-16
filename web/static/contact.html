@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — __BOT_NAME__</title>
+  <meta name="description" content="Un module ne marche pas, une idée, une question ? Écris au créateur du bot.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Contacter le créateur de __BOT_NAME__">
+  <meta property="og:description" content="Signaler un bug, proposer une idée ou poser une question.">
+  <meta property="og:image" content="__ORIGIN__/og.png">
+  <meta name="theme-color" content="#5865f2">
+  <link rel="icon" href="/favicon.png">
+  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img id="bot-avatar-small" alt=""><span class="bot-name">__BOT_NAME__</span></a>
+    <nav class="site-nav"><a href="/#fonctions">Fonctions</a><a href="/commands">Commandes</a><a href="/premium">Premium</a><a href="/status">Statut</a><a href="/contact" class="on">Contact</a></nav>
+    <div class="spacer"></div>
+    <a class="btn primary small" href="/dashboard">Panel</a>
+  </header>
+
+  <main class="section">
+    <h2>📬 Nous contacter</h2>
+    <p class="sub">Un module ne marche pas, une idée pour le bot, une question ? Chaque message est lu par le créateur du bot.</p>
+
+    <div class="contact-mail">
+      <span class="muted">E-mail</span>
+      <b id="email">__CONTACT_EMAIL__</b>
+      <button class="btn small" id="copy" type="button">📋 Copier</button>
+    </div>
+
+    <div class="features contact-cards">
+      <div class="feature">
+        <div class="icon">🐛</div>
+        <h3>Un module ne marche pas</h3>
+        <p>Dis-nous quel module, ce que tu as fait et ce qui s'est passé. Une capture d'écran aide beaucoup.</p>
+        <a class="btn primary" href="mailto:__CONTACT_EMAIL__?subject=%5BBug%5D%20" >✉️ Signaler un bug</a>
+      </div>
+      <div class="feature">
+        <div class="icon">💡</div>
+        <h3>Une idée</h3>
+        <p>Un module, une commande ou une option qui te manque ? Toutes les idées sont lues.</p>
+        <a class="btn primary" href="mailto:__CONTACT_EMAIL__?subject=%5BId%C3%A9e%5D%20">✉️ Proposer une idée</a>
+      </div>
+      <div class="feature">
+        <div class="icon">✉️</div>
+        <h3>Autre chose</h3>
+        <p>Premium, données personnelles, partenariat ou simple question.</p>
+        <a class="btn primary" href="mailto:__CONTACT_EMAIL__?subject=Bot%20Discord">✉️ Écrire un e-mail</a>
+      </div>
+    </div>
+
+    <div class="feature contact-discord">
+      <div class="icon">💬</div>
+      <h3>Depuis Discord, sans e-mail</h3>
+      <p>Tape <code>/contact</code> dans n'importe quel serveur où se trouve le bot, choisis 🐛, 💡 ou ✉️ et remplis le petit formulaire : le message arrive directement au créateur, qui peut te répondre en message privé.</p>
+    </div>
+  </main>
+
+  <footer class="site"><a href="/">Page d'accueil</a> · <a href="/commands">Commandes</a> · <a href="/premium">Premium</a> · <a href="/status">Statut</a> · <a href="/terms">Conditions d'utilisation</a> · <a href="/privacy">Confidentialité</a></footer>
+
+  <script src="/static/i18n.js"></script>
+  <script>
+    "use strict";
+    document.getElementById("copy").addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      navigator.clipboard.writeText(document.getElementById("email").textContent.trim()).then(() => {
+        btn.textContent = "✅ " + translateText("Copié");
+        setTimeout(() => (btn.textContent = "📋 " + translateText("Copier")), 2000);
+      }).catch(() => {});
+    });
+    fetch("/api/public").then((r) => r.ok ? r.json() : Promise.reject()).then((info) => {
+      document.querySelectorAll(".bot-name").forEach((n) => n.textContent = info.name);
+      if (info.avatar) document.getElementById("bot-avatar-small").src = info.avatar;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

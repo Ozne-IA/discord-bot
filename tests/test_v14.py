@@ -37,12 +37,14 @@ def test_og_banner_size():
 async def test_site_pages_and_status():
     client = await client_for(FakeBot())
     try:
-        for path in ("/", "/premium", "/commands", "/status", "/dashboard"):
+        for path in ("/", "/premium", "/commands", "/status", "/dashboard", "/contact"):
             resp = await client.get(path)
             html = await resp.text()
             assert resp.status == 200, path
             assert "__ORIGIN__" not in html and "__BOT_NAME__" not in html, path
             assert "theme.js" in html, path
+        contact_page = await (await client.get("/contact")).text()
+        assert "__CONTACT_EMAIL__" not in contact_page and "mailto:cerbere.bot.discord@gmail.com" in contact_page
         status = await (await client.get("/api/status")).json()
         assert status["online"] and status["latency_ms"] == 42 and status["members"] == 15 and status["modules"] == 2
         assert (await (await client.get("/api/commands")).json()) == {"commands": []}

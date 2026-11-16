@@ -188,7 +188,8 @@ class AllInOneBot(commands.AutoShardedBot):
         else:
             log.exception("Erreur dans /%s", interaction.command.name if interaction.command else "?",
                           exc_info=error)
-            msg = "Une erreur inattendue est survenue. Elle a été enregistrée dans les logs."
+            msg = ("Une erreur inattendue est survenue. Elle a été enregistrée dans les logs.\n"
+                   "Si ça recommence, signale-le avec `/contact`.")
         embed = embeds.error(msg)
         try:
             if interaction.response.is_done():

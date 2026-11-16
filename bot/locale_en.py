@@ -494,6 +494,14 @@ MESSAGES_EN: dict[str, str] = {
     "Twitch est injoignable pour le moment.": "Twitch can't be reached right now.",
     "Depuis Discord par {}": "From Discord by {}",
     # --- v14.10 : contact
+    "Merci de m'avoir ajouté ! 🎉\n\n**Configure-moi en 2 minutes sur le panel web :**\n{}\n\nCommandes utiles : `/help`, `/check_config`.\n📬 Un souci ou une idée ? Tape `/contact` : ton message arrive directement au créateur du bot.\n⚠️ Place mon rôle **au-dessus** des rôles que je dois gérer (Paramètres du serveur → Rôles).":
+        "Thanks for adding me! 🎉\n\n**Set me up in 2 minutes on the web dashboard:**\n{}\n\nUseful commands: `/help`, `/check_config`.\n📬 A problem or an idea? Type `/contact`: your message goes straight to the bot's creator.\n⚠️ Put my role **above** the roles I need to manage (Server Settings → Roles).",
+    "Merci de m'avoir ajouté ! 🎉\n\nCommandes utiles : `/help`, `/check_config`.\n📬 Un souci ou une idée ? Tape `/contact` : ton message arrive directement au créateur du bot.\n⚠️ Place mon rôle **au-dessus** des rôles que je dois gérer (Paramètres du serveur → Rôles).":
+        "Thanks for adding me! 🎉\n\nUseful commands: `/help`, `/check_config`.\n📬 A problem or an idea? Type `/contact`: your message goes straight to the bot's creator.\n⚠️ Put my role **above** the roles I need to manage (Server Settings → Roles).",
+    "📬 Un souci ou une idée ? Tape `/contact` : ton message arrive directement au créateur du bot.":
+        "📬 A problem or an idea? Type `/contact`: your message goes straight to the bot's creator.",
+    "Une erreur inattendue est survenue. Elle a été enregistrée dans les logs.\nSi ça recommence, signale-le avec `/contact`.":
+        "An unexpected error occurred. It has been logged.\nIf it happens again, report it with `/contact`.",
     "⚙️ **Tout se configure sur le panel web :** {}\n\nLes commandes de staff ne sont visibles que si tu as la permission.\n🐛 Un module ne marche pas ou une idée ? Tape `/contact`.":
         "⚙️ **Everything is configured on the web dashboard:** {}\n\nStaff commands are only visible if you have the permission.\n🐛 A module isn't working or got an idea? Type `/contact`.",
     "Les commandes de staff ne sont visibles que si tu as la permission.\n🐛 Un module ne marche pas ou une idée ? Tape `/contact`.": "Staff commands are only visible if you have the permission.\n🐛 A module isn't working or got an idea? Type `/contact`.",

@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Version** | 14.10.0 |
+| **Version** | 14.11.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
@@ -711,10 +711,11 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 | v14.8 | **Tickets** : réponses enregistrées (`/ticket reponse`, 5 en gratuit / 50 en 💎, variables `{user}` `{staff}` `{number}`, la réponse prend le ticket en charge), relance du staff si personne ne prend un ticket en charge, avertissement du membre avant la fermeture automatique |
 
 | v14.9 | **Shards** : le bot passe en mode AutoSharded (Discord choisit le nombre de shards, `SHARD_COUNT` pour le forcer), alertes si un shard reste coupé plus de 5 min ou dépasse 2 000 serveurs, shards visibles sur `/status`, `/ping` (shard du serveur), `/botinfo`, `/health` (`shards_down`, `?strict=1` en 503 si un shard est coupé) et envoyés à top.gg |
-| **v14.10 (actuelle)** | **Contact** : `/contact` (🐛 bug, 💡 idée, ✉️ autre → formulaire envoyé au propriétaire en MP ou dans `OWNER_ALERT_CHANNEL_ID`, même si `OWNER_ALERTS=off`, 1 message / 10 min par personne), e-mail public `cerbere.bot.discord@gmail.com` (modifiable avec `CONTACT_EMAIL`), lien **Contact** sur toutes les pages du site et dans le panel (`/contact` → messagerie), rappel dans `/help` |
+| v14.10 | **Contact** : `/contact` (🐛 bug, 💡 idée, ✉️ autre → formulaire envoyé au propriétaire en MP ou dans `OWNER_ALERT_CHANNEL_ID`, même si `OWNER_ALERTS=off`, 1 message / 10 min par personne), e-mail public `cerbere.bot.discord@gmail.com` (modifiable avec `CONTACT_EMAIL`), lien **Contact** sur toutes les pages du site et dans le panel, rappel dans `/help` |
+| **v14.11 (actuelle)** | **Contact plus visible** : vraie page `/contact` (e-mail avec bouton Copier, 🐛 bug / 💡 idée / ✉️ autre avec sujet d'e-mail prérempli, rappel de `/contact` dans Discord), Contact dans le menu du site, encadré « Un souci ou une idée ? » et question dans la FAQ de l'accueil, rappel de `/contact` dans le message d'arrivée du bot et dans les messages d'erreur inattendue, message d'arrivée enfin traduit en anglais |
 
 **Idées pour la suite :** alertes Instagram/X, saisons de classement, découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.10.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.11.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

@@ -180,7 +180,7 @@ class Dashboard:
         r.add_get("/premium", self.page("premium.html"))
         r.add_get("/commands", self.page("commands.html"))
         r.add_get("/status", self.page("status.html"))
-        r.add_get("/contact", self.contact_redirect)
+        r.add_get("/contact", self.page("contact.html"))
         r.add_get("/og.png", self.og_image)
         r.add_get("/favicon.ico", self.favicon)
         r.add_get("/favicon.png", self.favicon)
@@ -294,6 +294,8 @@ class Dashboard:
             user = self.bot.user
             html = html.replace("__ORIGIN__", self.public_url or "").replace(
                 "__BOT_NAME__", (user.name if user else "Bot").replace("<", "").replace('"', ""))
+            email = "".join(c for c in contact.contact_email() if c not in "<>\"'&?# ")
+            html = html.replace("__CONTACT_EMAIL__", email)
             # Seuls les scripts du site et ceux écrits dans la page (marqués d'un nonce) peuvent s'exécuter
             nonce = secrets.token_urlsafe(16)
             html = html.replace("<script>", f'<script nonce="{nonce}">')
@@ -370,10 +372,6 @@ class Dashboard:
         if user:
             raise web.HTTPFound(user.display_avatar.replace(size=64, format="png").url)
         raise web.HTTPFound("/static/favicon.svg")
-
-    async def contact_redirect(self, _: web.Request) -> web.Response:
-        """Lien « Contact » du site : ouvre la messagerie avec l'e-mail du créateur du bot."""
-        raise web.HTTPFound(f"mailto:{contact.contact_email()}?subject=Bot%20Discord")
 
     async def health(self, request: web.Request) -> web.Response:
         shards = sharding.shard_summary(self.bot)
