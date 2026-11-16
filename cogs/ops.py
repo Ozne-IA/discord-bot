@@ -4,6 +4,7 @@
 - Erreurs : chaque erreur écrite dans les logs est aussi envoyée (regroupée, 1 fois par heure au plus
   pour la même erreur, 20 alertes par heure maximum).
 - Serveurs : ajout et retrait du bot.
+- Shards : coupure de plus de 5 min, retour, et shard bientôt plein (2 000 serveurs sur 2 500).
 - Sauvegarde automatique chaque nuit, compressée, gardée dans data/backups/ et envoyée au propriétaire.
 
 Destination : OWNER_ALERT_CHANNEL_ID (un salon privé) si rempli, sinon un message privé au propriétaire
@@ -23,7 +24,7 @@ from pathlib import Path
 import discord
 from discord.ext import commands, tasks
 
-from bot import backups, embeds
+from bot import backups, embeds, sharding
 
 log = logging.getLogger("bot.ops")
 
@@ -88,6 +89,8 @@ class Ops(commands.Cog):
         self.handler = OwnerAlertHandler(self)
         self._target: discord.abc.Messageable | None = None
         self._announced = False
+        self.outages = sharding.OutageTracker()
+        self._crowded_alert = 0.0
 
     @property
     def db(self):
@@ -102,10 +105,12 @@ class Ops(commands.Cog):
             logging.getLogger().addHandler(self.handler)
         if backups.auto_enabled():
             self.auto_backup.start()
+        self.shard_watch.start()
 
     async def cog_unload(self) -> None:
         logging.getLogger().removeHandler(self.handler)
         self.auto_backup.cancel()
+        self.shard_watch.cancel()
 
     # ------------------------------------------------------------------ #
     #  Envoi au propriétaire
@@ -173,14 +178,56 @@ class Ops(commands.Cog):
         self._announced = True
         clean = getattr(self.bot, "previous_shutdown_clean", True)
         guilds = len(self.bot.guilds)
+        shards = getattr(self.bot, "shard_count", None) or 1
         text = (f"Version **{getattr(self.bot, 'version', '?')}** · **{guilds}** serveur(s) · "
-                f"latence **{self.bot.latency * 1000:.0f} ms**")
+                f"**{shards}** shard(s) · latence **{self.bot.latency * 1000:.0f} ms**")
         if clean:
             await self.notify("✅ Bot en ligne", text, color=0x2ECC71)
         else:
             await self.notify("⚠️ Bot redémarré après un arrêt imprévu",
                               text + "\n\nL'arrêt précédent n'était pas prévu (plantage, manque de mémoire ou "
                               "coupure). Regarde les logs Railway autour de l'heure de l'arrêt.", color=0xE67E22)
+
+    # ------------------------------------------------------------------ #
+    #  Shards : alerte si l'un reste coupé, ou s'il devient trop rempli
+    # ------------------------------------------------------------------ #
+    @commands.Cog.listener()
+    async def on_shard_disconnect(self, shard_id: int) -> None:
+        self.outages.disconnected(shard_id)
+
+    @commands.Cog.listener()
+    async def on_shard_resumed(self, shard_id: int) -> None:
+        await self._shard_back(shard_id)
+
+    @commands.Cog.listener()
+    async def on_shard_ready(self, shard_id: int) -> None:
+        await self._shard_back(shard_id)
+
+    async def _shard_back(self, shard_id: int) -> None:
+        downtime = self.outages.connected(shard_id)
+        if downtime is not None:
+            await self.notify("✅ Shard reconnecté", f"Le shard **{shard_id}** est de nouveau connecté "
+                              f"(coupure d'environ {max(1, round(downtime / 60))} min).", color=0x2ECC71)
+
+    @tasks.loop(minutes=1)
+    async def shard_watch(self) -> None:
+        for sid in self.outages.due():
+            count = sum(1 for g in self.bot.guilds if g.shard_id == sid)
+            await self.notify("🧩 Shard déconnecté", f"Le shard **{sid}** ({count} serveur(s)) est coupé de Discord "
+                              f"depuis plus de {sharding.OUTAGE_ALERT_AFTER // 60} min. Le bot essaie de se "
+                              "reconnecter tout seul. Si ça dure, redémarre-le sur Railway.", color=0xE67E22)
+        crowded = sharding.crowded_shards(sharding.shard_summary(self.bot))
+        if crowded and time.time() - self._crowded_alert >= 24 * 3600:  # une fois par jour au plus
+            self._crowded_alert = time.time()
+            names = ", ".join(f"n°{s['id']} ({s['guilds']})" for s in crowded)
+            await self.notify("🧩 Shard bientôt plein", f"Shard(s) {names} : Discord en accepte "
+                              f"{sharding.GUILDS_PER_SHARD} serveurs au maximum. Redémarre le bot sur Railway : "
+                              "Discord recalculera le nombre de shards (rien à régler si SHARD_COUNT est vide).",
+                              color=0xE67E22)
+
+    @shard_watch.before_loop
+    async def _before_shard_watch(self) -> None:
+        await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild) -> None:

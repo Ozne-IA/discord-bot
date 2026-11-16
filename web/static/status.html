@@ -33,7 +33,9 @@
       <div class="stat"><b id="members">–</b><span>membres</span></div>
       <div class="stat"><b id="modules">–</b><span>modules chargés</span></div>
       <div class="stat"><b id="version">–</b><span>version</span></div>
+      <div class="stat"><b id="shards">–</b><span>shards</span></div>
     </div>
+    <div class="cards" id="shard-list" hidden></div>
     <p class="muted center" style="font-size:13px" id="checked"></p>
   </main>
 
@@ -59,6 +61,21 @@
         $("members").textContent = fmt(s.members);
         $("modules").textContent = s.modules;
         $("version").textContent = s.version;
+        const shards = s.shards || [];
+        const down = shards.filter((x) => !x.online).length;
+        $("shards").textContent = shards.length ? (down ? `${shards.length - down}/${shards.length}` : shards.length) : "–";
+        const list = $("shard-list");
+        list.hidden = shards.length < 2;
+        list.replaceChildren(...(shards.length < 2 ? [] : shards.map((x) => {
+          const card = document.createElement("div");
+          card.className = "stat";
+          const b = document.createElement("b");
+          b.textContent = `${x.online ? "🟢" : "🔴"} #${x.id}`;
+          const span = document.createElement("span");
+          span.textContent = `${fmt(x.guilds)} ${translateText("serveurs")} · ${x.latency_ms == null ? "–" : x.latency_ms + " ms"}`;
+          card.append(b, span);
+          return card;
+        })));
         $("checked").textContent = translateText("Dernière vérification") + " : " + new Date().toLocaleTimeString(LANG === "en" ? "en-GB" : "fr-FR");
       }).catch(() => {
         $("dot").className = "status-dot off";

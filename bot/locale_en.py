@@ -68,7 +68,7 @@ MESSAGES_EN: dict[str, str] = {
     "Le panel web n'est pas activé sur ce bot (PUBLIC_URL manquant).": "The web dashboard isn't enabled on this bot (PUBLIC_URL missing).",
     "Ouvrir le panel": "Open the dashboard", "Connecte-toi avec Discord pour configurer ce serveur.": "Log in with Discord to configure this server.",
     "⚙️ Panel web": "⚙️ Web dashboard", "Ajouter le bot": "Add the bot", "Merci de partager le bot ! 💙": "Thanks for sharing the bot! 💙",
-    "🏓 Pong…": "🏓 Pong…", "🏓 Gateway : **{}**": "🏓 Gateway: **{}**", "📡 API : **{}**": "📡 API: **{}**",
+    "🏓 Pong…": "🏓 Pong…", "🏓 Gateway : **{}**": "🏓 Gateway: **{}**", "📡 API : **{}**": "📡 API: **{}**", "🧩 Shard : **{}**": "🧩 Shard: **{}**",
     "Version": "Version", "Uptime": "Uptime", "{} h {} min": "{} h {} min", "Serveurs": "Servers", "Membres": "Members", "Latence": "Latency",
     "Propriétaire": "Owner", "Créé": "Created", "Salons": "Channels", "Rôles": "Roles", "Boosts": "Boosts", "{} (niveau {})": "{} (level {})",
     "Compte créé": "Account created", "Arrivé": "Joined", "Rôles ({})": "Roles ({})", "aucun": "none",

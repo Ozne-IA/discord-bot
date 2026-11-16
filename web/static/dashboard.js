@@ -1213,6 +1213,8 @@ function renderTwitch() {
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.9", "Prêt pour les grands nombres", ["🧩 Le bot se découpe tout seul en shards au-delà de 2 500 serveurs",
+    "📡 Shards visibles sur la page Statut et dans /ping"]],
   ["14.8", "Tickets plus rapides", ["🎫 Réponses enregistrées : /ticket reponse (5, 💎 50), avec {user}, {staff} et {number}",
     "⏰ Relance du staff si personne ne prend un ticket en charge", "⏳ Le membre est prévenu avant la fermeture automatique d'un ticket inactif"]],
   ["14.7", "Tes données", ["/mes-donnees voir et /mes-donnees effacer pour chaque membre",

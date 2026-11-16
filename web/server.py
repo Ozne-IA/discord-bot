@@ -22,7 +22,7 @@ import aiohttp
 import discord
 from aiohttp import web
 
-from bot import ai_keys, diagnostic, secrets_box, twitch
+from bot import ai_keys, diagnostic, secrets_box, sharding, twitch
 from bot.ai_providers import PROVIDERS, ProviderError, list_models, valid_model
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
@@ -340,6 +340,7 @@ class Dashboard:
             "guilds": len(self.bot.guilds), "members": sum(g.member_count or 0 for g in self.bot.guilds),
             "uptime": int(time.time() - self.started), "version": self.bot.version,
             "modules": len(getattr(self.bot, "cogs", {}) or {}), "commands": len(self.command_list()),
+            "shards": sharding.shard_summary(self.bot),
             "dashboard": True, "checked_at": int(time.time())})
 
     async def og_image(self, _: web.Request) -> web.Response:
@@ -369,8 +370,12 @@ class Dashboard:
         raise web.HTTPFound("/static/favicon.svg")
 
     async def health(self, request: web.Request) -> web.Response:
-        ready = self.bot.is_ready() and not self.bot.is_closed()
-        body = {"ok": True, "discord_ready": ready, "guilds": len(self.bot.guilds)}
+        shards = sharding.shard_summary(self.bot)
+        down = [s["id"] for s in shards if not s["online"]]
+        # Un shard coupé = une partie des serveurs sans bot : compte comme « pas prêt » pour ?strict=1
+        ready = self.bot.is_ready() and not self.bot.is_closed() and not down
+        body = {"ok": True, "discord_ready": ready, "guilds": len(self.bot.guilds),
+                "shards": len(shards), "shards_down": down}
         # /health?strict=1 répond 503 si le bot n'est pas connecté à Discord (pour UptimeRobot & co).
         # Sans ?strict, toujours 200 : Railway s'en sert pendant le démarrage.
         if request.query.get("strict") and not ready:

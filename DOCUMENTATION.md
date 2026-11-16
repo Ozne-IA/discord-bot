@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 14.8.0 |
+| **Version** | 14.9.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 127 tests automatiques |
+| **Tests** | 131 tests automatiques |
 
 ---
 
@@ -594,7 +594,7 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 127 tests
+  pytest -q        # 131 tests
   ruff check .
   ```
 
@@ -707,10 +707,12 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 
 | v14.7 | **Ménage des données (RGPD)** : données d'un serveur quitté effacées 30 jours après le départ du bot (gardées s'il revient), vieilles données effacées (statistiques 120 j, XP par jour 62 j, journaux de sécurité 180 j, historique du panel 1 an), base compactée chaque semaine, `/mes-donnees voir` et `/mes-donnees effacer` pour chaque membre |
 
-| **v14.8 (actuelle)** | **Tickets** : réponses enregistrées (`/ticket reponse`, 5 en gratuit / 50 en 💎, variables `{user}` `{staff}` `{number}`, la réponse prend le ticket en charge), relance du staff si personne ne prend un ticket en charge, avertissement du membre avant la fermeture automatique |
+| v14.8 | **Tickets** : réponses enregistrées (`/ticket reponse`, 5 en gratuit / 50 en 💎, variables `{user}` `{staff}` `{number}`, la réponse prend le ticket en charge), relance du staff si personne ne prend un ticket en charge, avertissement du membre avant la fermeture automatique |
 
-**Idées pour la suite :** alertes Instagram/X, ménage des données des serveurs quittés, préparation du sharding (2 500 serveurs), découpage de `dashboard.js` et `web/server.py`.
+| **v14.9 (actuelle)** | **Shards** : le bot passe en mode AutoSharded (Discord choisit le nombre de shards, `SHARD_COUNT` pour le forcer), alertes si un shard reste coupé plus de 5 min ou dépasse 2 000 serveurs, shards visibles sur `/status`, `/ping` (shard du serveur), `/botinfo`, `/health` (`shards_down`, `?strict=1` en 503 si un shard est coupé) et envoyés à top.gg |
+
+**Idées pour la suite :** alertes Instagram/X, saisons de classement, découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.8.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.9.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

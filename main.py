@@ -21,6 +21,7 @@ from bot import __version__, embeds
 from bot.config import store
 from bot.i18n import I18N_VERSION, BotTranslator
 from bot.premium import premium
+from bot.sharding import shard_count_from_env
 from bot.translate import install as install_translation
 from bot.db import Database
 from web.server import Dashboard
@@ -79,7 +80,7 @@ def setup_logging() -> None:
 log = logging.getLogger("bot")
 
 
-class AllInOneBot(commands.Bot):
+class AllInOneBot(commands.AutoShardedBot):
     def __init__(self) -> None:
         intents = discord.Intents.default()
         intents.members = True          # arrivées / départs
@@ -89,6 +90,7 @@ class AllInOneBot(commands.Bot):
             intents=intents,
             allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
             help_command=None,
+            shard_count=shard_count_from_env(),  # None = Discord choisit (1 shard tant que le bot est petit)
         )
         self.db = Database(os.getenv("DATABASE_PATH") or ROOT / "data" / "bot.db")
         self.version = __version__
@@ -158,8 +160,8 @@ class AllInOneBot(commands.Bot):
 
     async def on_ready(self) -> None:
         assert self.user
-        log.info("Connecté en tant que %s (%s) sur %d serveur(s)",
-                 self.user, self.user.id, len(self.guilds))
+        log.info("Connecté en tant que %s (%s) sur %d serveur(s), %d shard(s)",
+                 self.user, self.user.id, len(self.guilds), self.shard_count or 1)
 
     @tasks.loop(minutes=2)
     async def rotate_status(self) -> None:

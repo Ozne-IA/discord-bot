@@ -210,6 +210,14 @@ Sans `AI_KEYS_SECRET`, le panel affiche « le propriétaire du bot doit d'abord 
 4. **Connecte le compte du bot** : dans un navigateur où tu es connecté à Twitch **avec le compte du bot** (fenêtre privée conseillée), connecte-toi au panel avec ton compte Discord, ouvre un serveur → onglet **Modération Twitch** → **Connecter le compte Twitch du bot (propriétaire)**, et accepte.
 5. Les streamers n'ont plus qu'à cliquer sur **Connecter ma chaîne Twitch** dans leur panel, puis taper `/mod nomdubot` dans leur chat.
 
+### 1 quater. (v14.9) Beaucoup de serveurs : les shards
+**Rien à faire.** Discord impose de découper la connexion du bot en « shards » à partir de 2 500 serveurs (au plus 2 500 serveurs par shard). Le bot le fait tout seul : à chaque démarrage, Discord lui dit combien en ouvrir (1 seul tant que le bot est petit).
+- Tu reçois une alerte si un shard reste coupé plus de 5 minutes, puis quand il revient.
+- Tu reçois une alerte si un shard dépasse 2 000 serveurs : **redéploie** alors le bot sur Railway (Deployments → ⋮ → Redeploy) pour que Discord recalcule le nombre de shards.
+- La page `/status` du site montre chaque shard dès qu'il y en a plusieurs.
+- Vers 2 000 à 3 000 serveurs, surveille la **mémoire** dans Railway (onglet Metrics) : le bot garde la liste des membres de chaque serveur. Monte la limite de mémoire du service si elle approche du maximum.
+- La variable `SHARD_COUNT` sert seulement à forcer un nombre précis. Laisse-la vide.
+
 ### 2. Être prévenu si Railway tombe (5 minutes, gratuit)
 Si Railway entier est en panne, le bot ne peut pas te prévenir lui-même. Un service extérieur le peut :
 1. Crée un compte gratuit sur <https://uptimerobot.com> (ou Better Stack).

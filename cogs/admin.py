@@ -88,8 +88,13 @@ class Admin(commands.Cog):
         start = time.perf_counter()
         await interaction.response.send_message(embed=embeds.info("🏓 Pong…"), ephemeral=True)
         api = (time.perf_counter() - start) * 1000
+        gateway = self.bot.latency
+        shard = interaction.guild.shard_id if interaction.guild else 0
+        info = self.bot.get_shard(shard) if hasattr(self.bot, "get_shard") else None
+        if info is not None and info.latency == info.latency:
+            gateway = info.latency
         await interaction.edit_original_response(embed=embeds.info(
-            f"🏓 Gateway : **{self.bot.latency * 1000:.0f} ms**\n📡 API : **{api:.0f} ms**"))
+            f"🏓 Gateway : **{gateway * 1000:.0f} ms**\n📡 API : **{api:.0f} ms**\n🧩 Shard : **{shard}**"))
 
     @app_commands.command(name="botinfo", description="Informations sur le bot")
     async def botinfo(self, interaction: discord.Interaction) -> None:
@@ -100,6 +105,7 @@ class Admin(commands.Cog):
         embed.add_field(name="Uptime", value=f"{h} h {rem // 60} min")
         embed.add_field(name="Serveurs", value=str(len(self.bot.guilds)))
         embed.add_field(name="Membres", value=str(sum(g.member_count or 0 for g in self.bot.guilds)))
+        embed.add_field(name="Shards", value=str(getattr(self.bot, "shard_count", None) or 1))
         embed.add_field(name="Python", value=platform.python_version())
         embed.add_field(name="discord.py", value=discord.__version__)
         await interaction.response.send_message(embed=embed, ephemeral=True)

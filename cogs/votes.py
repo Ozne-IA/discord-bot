@@ -50,7 +50,8 @@ class Votes(commands.Cog):
         headers = {"Authorization": votes.topgg_token(), "Content-Type": "application/json"}
         try:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as http:
-                async with http.post(url, json={"server_count": count}, headers=headers) as resp:
+                payload = {"server_count": count, "shard_count": getattr(self.bot, "shard_count", None) or 1}
+                async with http.post(url, json=payload, headers=headers) as resp:
                     if resp.status == 429:
                         try:
                             wait = int((await resp.json(content_type=None)).get("retry-after", 3600))
