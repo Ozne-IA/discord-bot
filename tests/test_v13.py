@@ -123,7 +123,7 @@ async def test_ai_daily_quota(tmp_path, monkeypatch):
         cog, _ = fake_ai(None, db)
         guild = SimpleNamespace(id=5)
         assert [await cog.take_quota(guild) for _ in range(3)] == [True, True, False]
-        assert db.version == 19
+        assert db.version >= 19
         cols = [r[1] for r in await db.fetchall("PRAGMA table_info(invite_joins)")]
         assert "rewarded" in cols
     finally:

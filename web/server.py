@@ -26,9 +26,10 @@ from bot import diagnostic
 from bot.access import apply_restricted, groups_for_roles
 from bot.staff import build_staff_stats
 from bot.config import DEFAULTS, LIMITS, PREMIUM_PATHS, deep_merge, gconf, limit_for, store
-from bot.premium import premium, store_url
+from bot.premium import premium, store_url, trial_days
 from bot.templates import template_list
 from bot.panels import PANELS, publish_panel
+from web.security import RateLimiter, bucket_for, client_ip, content_security_policy
 
 if TYPE_CHECKING:
     from main import AllInOneBot
@@ -75,6 +76,7 @@ COMMAND_MODULES = {
     "Stats": "Statistiques", "Games": "Mini-jeux", "TempVoice": "Vocaux temporaires", "Community": "Suggestions & communauté",
     "Custom": "Commandes perso", "Modmail": "Modmail & invitations", "Invites": "Modmail & invitations",
     "Engagement": "Succès & quêtes", "Events": "Événements & tournois", "AI": "Assistant IA", "ModTools": "Modération",
+    "Votes": "Économie", "Ops": "Configuration",
 }
 TEST_KINDS = ("welcome", "dm", "goodbye", "levelup", "birthday")
 
@@ -148,6 +150,7 @@ class Dashboard:
         self._commands_cache: list[dict] | None = None
         self._og_cache: tuple[float, bytes] | None = None
         self._last_test: dict[int, float] = {}
+        self.limiter = RateLimiter()
 
     @property
     def oauth_ready(self) -> bool:
@@ -165,7 +168,7 @@ class Dashboard:
     #  Démarrage
     # ------------------------------------------------------------------ #
     def make_app(self) -> web.Application:
-        app = web.Application(middlewares=[self.errors_middleware], client_max_size=256 * 1024)
+        app = web.Application(middlewares=[self.errors_middleware, self.rate_limit_middleware], client_max_size=256 * 1024)
         r = app.router
         r.add_get("/", self.page("index.html"))
         r.add_get("/dashboard", self.page("dashboard.html"))
@@ -182,6 +185,7 @@ class Dashboard:
         r.add_post("/api/guilds/{guild_id}/test", self.api_test)
         r.add_static("/static", STATIC, append_version=True)
         r.add_get("/health", self.health)
+        r.add_post("/webhooks/topgg", self.topgg_webhook)
         r.add_get("/login", self.login)
         r.add_get("/callback", self.callback)
         r.add_post("/logout", self.logout)
@@ -201,6 +205,7 @@ class Dashboard:
         r.add_get("/api/guilds/{guild_id}/export", self.api_export)
         r.add_post("/api/guilds/{guild_id}/template", self.api_template)
         r.add_post("/api/guilds/{guild_id}/import", self.api_import)
+        r.add_post("/api/guilds/{guild_id}/trial", self.api_trial)
         return app
 
     async def start(self) -> None:
@@ -242,7 +247,21 @@ class Dashboard:
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        if self.secure:
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
         return response
+
+    @web.middleware
+    async def rate_limit_middleware(self, request: web.Request, handler):
+        """Trop de requêtes depuis la même adresse : on fait patienter (protège le site et le bot)."""
+        bucket = bucket_for(request.method, request.path)
+        if bucket:
+            wait = self.limiter.check(client_ip(request), bucket)
+            if wait:
+                return web.json_response({"error": f"Trop de requêtes : réessaie dans {wait} s."}, status=429,
+                                         headers={"Retry-After": str(wait)})
+        return await handler(request)
 
     def page(self, name: str, english: str | None = None):
         async def handler(request: web.Request) -> web.StreamResponse:
@@ -262,7 +281,11 @@ class Dashboard:
             user = self.bot.user
             html = html.replace("__ORIGIN__", self.public_url or "").replace(
                 "__BOT_NAME__", (user.name if user else "Bot").replace("<", "").replace('"', ""))
-            return web.Response(text=html, content_type="text/html", headers={"Cache-Control": "no-cache"})
+            # Seuls les scripts du site et ceux écrits dans la page (marqués d'un nonce) peuvent s'exécuter
+            nonce = secrets.token_urlsafe(16)
+            html = html.replace("<script>", f'<script nonce="{nonce}">')
+            return web.Response(text=html, content_type="text/html", headers={
+                "Cache-Control": "no-cache", "Content-Security-Policy": content_security_policy(nonce)})
         return handler
 
     # ------------------------------------------------------------------ #
@@ -334,8 +357,33 @@ class Dashboard:
             raise web.HTTPFound(user.display_avatar.replace(size=64, format="png").url)
         raise web.HTTPFound("/static/favicon.svg")
 
-    async def health(self, _: web.Request) -> web.Response:
-        return web.json_response({"ok": True, "discord_ready": self.bot.is_ready(), "guilds": len(self.bot.guilds)})
+    async def health(self, request: web.Request) -> web.Response:
+        ready = self.bot.is_ready() and not self.bot.is_closed()
+        body = {"ok": True, "discord_ready": ready, "guilds": len(self.bot.guilds)}
+        # /health?strict=1 répond 503 si le bot n'est pas connecté à Discord (pour UptimeRobot & co).
+        # Sans ?strict, toujours 200 : Railway s'en sert pendant le démarrage.
+        if request.query.get("strict") and not ready:
+            return web.json_response({**body, "ok": False}, status=503)
+        return web.json_response(body)
+
+    async def topgg_webhook(self, request: web.Request) -> web.Response:
+        """Vote sur top.gg : enregistré pour que le membre récupère sa récompense avec /vote."""
+        from bot import votes
+        raw = await request.read()
+        try:
+            vote = votes.parse_webhook(request.headers, raw, votes.webhook_secret())
+        except votes.WebhookError as exc:
+            log.warning("Webhook top.gg refusé : %s", exc)
+            return web.json_response({"error": str(exc)}, status=exc.status)
+        if vote.test:
+            log.info("Webhook top.gg de test reçu (utilisateur %s)", vote.user_id)
+            return web.json_response({"ok": True, "test": True})
+        await votes.record_vote(self.db, vote)
+        cog = self.bot.get_cog("Votes")
+        if cog is not None:
+            import asyncio
+            asyncio.ensure_future(cog.thank(vote))  # type: ignore[attr-defined]
+        return web.json_response({"ok": True})
 
     def _check_csrf(self, request: web.Request) -> None:
         if request.headers.get("X-Requested-With") != "dashboard":
@@ -571,6 +619,7 @@ class Dashboard:
             "premium": {**premium.status(guild.id),
                         "paths": PREMIUM_PATHS,
                         "store_url": store_url(self.bot.application_id),
+                        "trial": await premium.trial_state(self.db, guild.id), "trial_days": trial_days(),
                         "twitch_enabled": bool(os.getenv("TWITCH_CLIENT_ID") and os.getenv("TWITCH_CLIENT_SECRET")),
                         "ai_ready": bool(os.getenv("ANTHROPIC_API_KEY", "").strip())},
         }
@@ -719,6 +768,21 @@ class Dashboard:
         return web.json_response({"entries": [
             {"user_id": str(r["user_id"]), "username": r["username"], "action": r["action"],
              "details": json.loads(r["details"] or "[]"), "at": r["created_at"]} for r in rows]})
+
+    async def api_trial(self, request: web.Request) -> web.Response:
+        """Démarre l'essai Premium gratuit (une fois par serveur, admins seulement)."""
+        self._check_csrf(request)
+        session, guild = await self._require_guild(request, "full")
+        try:
+            ends = await premium.start_trial(self.db, guild.id, session["user_id"])
+        except ValueError as exc:
+            raise HTTPError(400, str(exc)) from None
+        await self._audit(guild.id, session, "trial", [f"{trial_days()} jours"])
+        log.info("Essai Premium démarré depuis le panel : serveur %s", guild.id)
+        from cogs.ops import notify_owner
+        await notify_owner(self.bot, "🎁 Essai Premium démarré",
+                           f"**{guild.name}** (`{guild.id}`) · {guild.member_count} membres (depuis le panel)", 0xF1C40F)
+        return web.json_response({"ok": True, "expires_at": ends})
 
     async def api_send(self, request: web.Request) -> web.Response:
         """Envoie tout de suite un message (embed) dans un salon, depuis le panel."""

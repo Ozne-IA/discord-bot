@@ -162,7 +162,52 @@ Rien à changer sur le portail Discord : l'adresse de redirection `https://panel
 
 Ne relance **plus** `start.bat` avec le même token pendant que Railway tourne. Pour tester sans risque, crée une deuxième application Discord (bot de test) avec son propre token, et mets ce token-là dans le `.env` de ton PC.
 
-**Sauvegardes** : fais un `/backup` de temps en temps (par exemple une fois par semaine) et garde le fichier chez toi.
+**Sauvegardes** : depuis la version 14.2, le bot fait **tout seul** une sauvegarde chaque nuit (vers 4 h, heure UTC) et te l'envoie en message privé (fichier `auto_….db.gz`). Garde ces fichiers : `/restore` les accepte tels quels. Les 14 dernières restent aussi sur le volume, dans `data/backups/`. `/backup` reste disponible pour une copie immédiate (avant une grosse mise à jour par exemple).
+
+> ⚠️ Pour recevoir les sauvegardes et les alertes en message privé, autorise les messages privés venant d'un serveur que tu partages avec le bot. Sinon, crée un salon privé sur ton serveur et mets son ID dans `OWNER_ALERT_CHANNEL_ID`.
+
+---
+
+## Nouveautés de la version 14.2 : ce que tu as à faire
+
+Tout est facultatif : sans ces réglages, le bot marche comme avant.
+
+### 1. Alertes et sauvegardes (rien à faire)
+Le bot t'envoie en message privé :
+- ✅ « Bot en ligne » à chaque démarrage, ou ⚠️ si l'arrêt précédent était un plantage ;
+- 🚨 chaque erreur (la même erreur une fois par heure au plus) ;
+- ➕ / ➖ quand un serveur ajoute ou retire le bot ;
+- 💎 / 🎁 quand un serveur s'abonne ou démarre son essai ;
+- 📦 la sauvegarde de la nuit.
+
+Variables facultatives (onglet **Variables** de Railway) :
+
+| Variable | Effet |
+|---|---|
+| `OWNER_ALERT_CHANNEL_ID` | ID d'un salon privé où envoyer tout ça au lieu de tes MP |
+| `OWNER_ALERTS=off` | Coupe les alertes (les sauvegardes sont quand même envoyées) |
+| `BACKUP_AUTO=off` | Coupe la sauvegarde automatique |
+| `BACKUP_HOUR` | Heure UTC de la sauvegarde (0 à 23, défaut 4) |
+| `BACKUP_KEEP` | Nombre de sauvegardes gardées sur le volume (défaut 14) |
+| `PREMIUM_TRIAL_DAYS` | Durée de l'essai Premium gratuit (défaut 7, `0` = pas d'essai) |
+
+### 2. Être prévenu si Railway tombe (5 minutes, gratuit)
+Si Railway entier est en panne, le bot ne peut pas te prévenir lui-même. Un service extérieur le peut :
+1. Crée un compte gratuit sur <https://uptimerobot.com> (ou Better Stack).
+2. **Add New Monitor** → type **HTTP(s)** → adresse : `https://panel.clipmovestudio.app/health?strict=1` → toutes les 5 minutes.
+3. Choisis d'être prévenu par e-mail (ou sur l'application mobile).
+
+`?strict=1` répond « erreur » dès que le bot n'est plus connecté à Discord, même si le site répond encore.
+
+### 3. top.gg (quand tu voudras faire connaître le bot)
+1. Ajoute le bot sur <https://top.gg> (bouton **Add**), remplis la fiche et attends la validation.
+2. Fiche du bot → **Edit** → **Webhooks** (ou **Integrations & API**) :
+   - adresse du webhook : `https://panel.clipmovestudio.app/webhooks/topgg` ;
+   - choisis ou copie le **secret** du webhook → mets-le dans la variable `TOPGG_WEBHOOK_SECRET` ;
+   - copie le **token** de l'API → mets-le dans `TOPGG_TOKEN` (le nombre de serveurs sera envoyé tout seul toutes les 30 minutes).
+3. Redéploie, puis clique sur **Send Test** dans top.gg : les logs Railway doivent afficher « Webhook top.gg de test reçu ».
+
+Ensuite, les membres votent sur top.gg, reçoivent un MP de remerciement et tapent `/vote` sur leur serveur pour gagner de la monnaie (200 par défaut, ×2 le week-end, réglable dans le panel → **Économie**).
 
 ---
 

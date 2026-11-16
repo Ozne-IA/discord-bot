@@ -4,14 +4,14 @@
 
 | | |
 |---|---|
-| **Version** | 14.1.0 |
+| **Version** | 14.2.0 |
 | **Type** | Bot public multi-serveurs (chaque serveur a sa propre configuration) |
 | **Panel** | Site web intégré : page de présentation + tableau de bord (connexion Discord OAuth2) |
 | **Langage** | Python 3.11+ (testé avec 3.15) · discord.py 2.4+ (testé avec 2.7.1) · aiohttp |
 | **Base de données** | SQLite asynchrone, migrations automatiques |
 | **Hébergement** | Ton PC + Cloudflare Tunnel pour commencer, puis 24 h/24 sur Railway **ou** un VPS |
 | **Commandes** | 104 commandes slash + 1 menu clic droit (bot entièrement traduisible en anglais) |
-| **Tests** | 86 tests automatiques |
+| **Tests** | 96 tests automatiques |
 
 ---
 
@@ -401,7 +401,8 @@ Dans le panel, sous chaque message personnalisable (bienvenue, message privé, a
 ### 💎 Premium
 | Commande | Effet |
 |---|---|
-| `/premium` | Statut du serveur, avantages et bouton **S'abonner** |
+| `/premium` | Statut du serveur, avantages, bouton **S'abonner** et 🎁 **Essai gratuit** (7 jours, une fois par serveur, aussi dans l'onglet Premium du panel) |
+| `/vote` | Lien de vote top.gg ; après avoir voté, le membre récupère sa récompense sur le serveur de son choix (réglable dans **Économie**, ×2 le week-end) |
 | `/giveaway start <prix> <durée> [gagnants] [salon] [rôle_requis]` | Lance un giveaway avec bouton 🎉 Participer |
 | `/giveaway end <id>` · `/giveaway reroll <id> [gagnants]` · `/giveaway list` | Terminer, refaire un tirage, voir les giveaways en cours |
 | `/sondage creer <question> <choix A \| B \| C> [durée]` | Sondage à boutons (2 à 10 choix), résultats en direct |
@@ -455,6 +456,8 @@ Chaque serveur est **gratuit** par défaut. Premium s'achète **par serveur**, a
 | 👮 Activité du staff (/modstats par période, onglet Statistiques) + /unnote | ✅ | ✅ |
 | 👮 Accès au panel par rôle (modérateurs sans « Gérer le serveur ») | ❌ | ✅ |
 | 📅 Événements avec inscription et rappel (/evenement) | ✅ | ✅ |
+| 🎁 Essai Premium gratuit (une fois par serveur) | ✅ 7 jours | — |
+| 🗳️ Récompense de vote top.gg (/vote) | ✅ | ✅ |
 | 🏆 Tournois à élimination directe (/tournoi) | 16 joueurs | 64 joueurs |
 | 🤝 Récompense de parrainage (invité resté X jours) | ✅ | ✅ |
 | 🤖 Assistant IA : FAQ (/ia, salon, mention), /resume-ticket, /annonce-ia | ❌ | ✅ |
@@ -576,14 +579,16 @@ Pour faire évoluer la base, **ajoute** une migration à la fin de `MIGRATIONS` 
 - **Mettre à jour le bot** :
   - Railway : pousse sur GitHub et le redéploiement est automatique. La base est conservée grâce au volume.
   - VPS : `git pull && docker compose up -d --build`
-- **Sauvegarder** : `/backup` (toi seul) crée une copie cohérente dans `data/backups/` et te l'envoie. Sur un VPS, tu peux aussi copier `data/bot.db` tous les jours avec cron :
+- **Sauvegarde automatique** (v14.2) : chaque nuit vers 4 h UTC, le bot compresse la base (`auto_….db.gz`), garde les 14 dernières dans `data/backups/` et t'envoie la copie en message privé (ou dans `OWNER_ALERT_CHANNEL_ID`). Réglages : `BACKUP_AUTO`, `BACKUP_HOUR`, `BACKUP_KEEP`.
+- **Alertes** (v14.2) : démarrage, plantage, erreurs, serveurs ajoutés/retirés, abonnements et essais t'arrivent en message privé (`OWNER_ALERTS=off` pour couper). Pour être prévenu si Railway tombe, surveille `/health?strict=1` avec UptimeRobot (voir RAILWAY.md).
+- **Sauvegarder** : `/backup` (toi seul) crée une copie compressée (`.db.gz`) dans `data/backups/` et te l'envoie ; `/restore` accepte `.db` et `.db.gz`. Sur un VPS, tu peux aussi copier `data/bot.db` tous les jours avec cron :
   `0 4 * * * cp /chemin/discord-bot/data/bot.db /sauvegardes/bot_$(date +\%F).db`
 - **Restaurer** : `/restore` avec le fichier `.db` (toi seul). Le bot vérifie le fichier, redémarre et l'applique. Sans Discord : arrête le bot, remplace `data/bot.db` par la sauvegarde, puis relance.
 - **Logs** : `data/bot.log` (rotation sur 5 fichiers de 5 Mo), ou l'onglet **Logs** de Railway, ou `docker compose logs -f bot`.
 - **Tests** :
   ```bash
   pip install -r requirements.txt -r requirements-dev.txt
-  pytest -q        # 86 tests
+  pytest -q        # 96 tests
   ruff check .
   ```
 
@@ -682,10 +687,12 @@ Regarde toujours les logs : chaque erreur y est écrite en entier.
 
 | v14 | Site refait (**accueil** à jour, pages **Commandes**, **Premium**, **Statut**, aperçu de partage et icône), panel plus pratique (**menu par catégories**, **recherche** de réglages, **checklist** de configuration, **Ctrl+S**, points des onglets modifiés, boutons **Tester dans Discord** et **↺ par défaut**, **thème clair / sombre**, **Nouveautés**, changement rapide de serveur) |
 
-| **v14.1 (actuelle)** | **Prêt pour Railway** : guide [RAILWAY.md](RAILWAY.md), commande **/restore** pour déménager les données, droits du volume réglés automatiquement, police installée dans l'image Docker pour les images générées, commandes du propriétaire cachées sur la page Commandes |
+| v14.1 | **Prêt pour Railway** : guide [RAILWAY.md](RAILWAY.md), commande **/restore** pour déménager les données, droits du volume réglés automatiquement, police installée dans l'image Docker pour les images générées, commandes du propriétaire cachées sur la page Commandes |
 
-**Idées pour la suite :** alertes Instagram/X, sauvegarde automatique de la base.
+| **v14.2 (actuelle)** | **Fiabilité et croissance** : sauvegarde automatique chaque nuit envoyée au propriétaire, alertes en message privé (erreurs, plantages, serveurs, abonnements), `/health?strict=1` pour la surveillance externe, site protégé (limite de requêtes par adresse, politique CSP, HSTS), **top.gg** (nombre de serveurs + `/vote` récompensé), 🎁 **essai Premium gratuit** de 7 jours avec rappels |
+
+**Idées pour la suite :** alertes Instagram/X, ménage des données des serveurs quittés, préparation du sharding (2 500 serveurs), découpage de `dashboard.js` et `web/server.py`.
 
 ---
 
-*Documentation de la version 14.1.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*
+*Documentation de la version 14.2.0. Mets-la à jour quand tu ajoutes une fonctionnalité.*

@@ -139,6 +139,7 @@
     "bank_enabled": true,
     "bank_interest": 1.0,
     "bank_max": 1000000,
+    "vote_reward": 200,
     "shop": []
   },
   "modmail": {

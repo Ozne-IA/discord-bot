@@ -434,4 +434,39 @@ MESSAGES_EN: dict[str, str] = {
     "Catégorie": "Category", "Nouvel article": "New article",
     # --- durées (format_duration) : 1j 2h 3min 4s
     "{}j": "{}d", "{}j {}h": "{}d {}h", "{}h {}min": "{}h {}min",
+    # --- v14.2 : votes top.gg, essai Premium, sauvegardes
+    "🗳️ Vote": "🗳️ Vote", "🗳️ Vote reçu": "🗳️ Vote received", "🗳️ Récompense de vote": "🗳️ Vote reward",
+    "Voter sur top.gg": "Vote on top.gg",
+    "Les votes ne sont pas encore activés sur ce bot.": "Votes are not enabled on this bot yet.",
+    "Merci pour ton vote ! Tu reçois {}.": "Thanks for voting! You get {}.",
+    "Merci pour ton vote ! Tu reçois {}. (×2 le week-end 🎉)": "Thanks for voting! You get {}. (×2 on weekends 🎉)",
+    "Tu as déjà voté. Prochain vote possible {}.": "You already voted. Next vote possible {}.",
+    "Ta récompense a déjà été récupérée.": "Your reward has already been claimed.",
+    "Tu as déjà voté. Prochain vote possible {}.\nTa récompense a déjà été récupérée.":
+        "You already voted. Next vote possible {}.\nYour reward has already been claimed.",
+    "Vote pour le bot sur top.gg (une fois toutes les 12 h), puis reviens taper **/vote** ici.":
+        "Vote for the bot on top.gg (once every 12 h), then come back and type **/vote** here.",
+    "Tu gagneras {} (×2 le week-end).": "You'll get {} (×2 on weekends).",
+    "Merci pour ton vote ! 💙": "Thanks for your vote! 💙",
+    "Tape **/vote** sur ton serveur dans les 24 h pour récupérer ta récompense (doublée le week-end !).":
+        "Type **/vote** on your server within 24 h to claim your reward (doubled on weekends!).",
+    "Tape **/vote** sur ton serveur dans les 24 h pour récupérer ta récompense.":
+        "Type **/vote** on your server within 24 h to claim your reward.",
+    "Essai gratuit {} jours": "{}-day free trial", "💎 Essai gratuit activé": "💎 Free trial activated",
+    "🎁 **Essai gratuit de {} jours** (tout Premium, sans paiement, une seule fois par serveur).":
+        "🎁 **{}-day free trial** (all of Premium, no payment, once per server).",
+    "Seuls ceux qui ont la permission « Gérer le serveur » peuvent lancer l'essai.":
+        "Only members with the Manage Server permission can start the trial.",
+    "L'essai gratuit a déjà été utilisé sur ce serveur.": "The free trial has already been used on this server.",
+    "L'essai gratuit est déjà en cours.": "The free trial is already running.",
+    "Ce serveur est déjà Premium.": "This server is already Premium.",
+    "L'essai gratuit n'est pas proposé.": "The free trial is not available.",
+    "🎁 **{}** est Premium jusqu'au {} !": "🎁 **{}** is Premium until {}!",
+    "Toutes les fonctions 💎 sont débloquées. Tu seras prévenu un jour avant la fin.":
+        "All 💎 features are unlocked. You'll be reminded one day before it ends.",
+    "Configure-les sur le panel ➜ {}": "Set them up on the dashboard ➜ {}",
+    "⏳ Plus qu'un jour d'essai Premium": "⏳ One day of Premium trial left",
+    "💎 Essai Premium terminé": "💎 Premium trial ended",
+    "Archive .gz abîmée.": "Damaged .gz archive.",
+    "Sauvegarde trop grosse une fois décompressée.": "Backup too large once decompressed.",
 }

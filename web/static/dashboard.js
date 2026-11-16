@@ -701,6 +701,7 @@ const SECTIONS = [
     { path: "economy.bank_enabled", type: "toggle", label: "Banque", help: "/banque deposer et /banque retirer : l'argent placé rapporte des intérêts chaque jour." },
     { path: "economy.bank_interest", type: "number", label: "Intérêts par jour (%)", help: "Entre 0 et 10 %. Version gratuite : 1 %.", step: 0.1, max: 10 },
     { path: "economy.bank_max", type: "number", label: "Plafond de la banque", help: "Au-delà, plus de dépôt ni d'intérêts. 0 = pas de plafond.", max: 1000000000 },
+    { path: "economy.vote_reward", type: "number", label: "Récompense de vote (top.gg)", help: "Donnée avec /vote après avoir voté pour le bot sur top.gg (doublée le week-end). 0 = pas de récompense.", max: 1000000 },
     { path: "economy.shop", type: "shop", label: "Boutique", help: "Un objet peut donner un rôle quand on l'achète (place le rôle sous celui du bot)." },
   ] },
   { id: "engagement", icon: "🏅", title: "Succès & quêtes", desc: "Fait revenir les membres : 19 succès à débloquer (badges + récompenses), 3 quêtes par jour, séries d'activité. Commandes : /profil, /succes, /quetes.", fields: [
@@ -993,7 +994,7 @@ function renderMessageLog() {
 
 const AUDIT_LABELS = { config: "a modifié la configuration", autocreate: "a lancé la création automatique",
   panels: "a publié les panneaux", send: "a envoyé un message", rolemenu: "a publié un menu de rôles", import: "a importé une sauvegarde",
-  template: "a appliqué un modèle" };
+  template: "a appliqué un modèle", trial: "a démarré l'essai Premium" };
 // (l'onglet Statistiques est visible avec l'accès « Statistiques » ou « Modération »)
 
 function renderAudit() {
@@ -1034,6 +1035,20 @@ function renderPremium() {
         p.source === "grant" ? " (accès offert)" : " (abonnement Discord)",
         p.expires_at ? ` jusqu'au ${new Date(p.expires_at * 1000).toLocaleDateString("fr-FR")}` : "", ". Merci !")
     : h("div", { class: "notice warn" }, "Ce serveur utilise la version gratuite. Les réglages 💎 sont enregistrés mais inactifs.");
+  const trial = !p.active && p.trial === "available" && fullAccess()
+    ? h("div", { class: "notice" }, h("strong", {}, `🎁 Essai gratuit de ${p.trial_days} jours`),
+        " : toutes les fonctions 💎, sans paiement, une seule fois par serveur. ",
+        h("button", { class: "btn primary", onclick: async (e) => {
+          if (JSON.stringify(state.cfg) !== state.original && !confirm("Tu as des modifications non enregistrées : elles seront perdues. Continuer ?")) return;
+          e.target.disabled = true;
+          try {
+            await api("POST", `/api/guilds/${state.guild.guild.id}/trial`);
+            loadGuildData(await api("GET", `/api/guilds/${state.guild.guild.id}`));
+            state.section = "premium"; renderGuild();
+            toast("🎁 Essai Premium activé !");
+          } catch (err) { e.target.disabled = false; toast(err.message, "err"); }
+        } }, "Démarrer l'essai"))
+    : null;
   const cta = p.active ? null : p.store_url
     ? h("a", { class: "btn primary big", href: p.store_url, target: "_blank", rel: "noopener" }, "💎 Passer à Premium")
     : h("p", { class: "muted" }, "Pour activer Premium, contacte le propriétaire du bot (ou tape /premium dans Discord).");
@@ -1041,11 +1056,14 @@ function renderPremium() {
     h("div", { class: "premium-grid" },
       PREMIUM_FEATURES.map(([icon, title, text]) => h("div", { class: "feature" },
         h("div", { class: "icon" }, icon), h("h3", {}, title), h("p", {}, text)))),
-    cta)];
+    trial, cta)];
 }
 
 // ------------------------------------------------------------------ nouveautés
 const CHANGELOG = [
+  ["14.2", "Essai Premium, votes et fiabilité", ["🎁 Essai Premium gratuit de 7 jours (une fois par serveur)",
+    "🗳️ /vote : vote pour le bot sur top.gg et gagne de la monnaie (récompense réglable dans Économie)",
+    "Site mieux protégé contre les abus", "Sauvegardes automatiques chaque nuit"]],
   ["14", "Panel et site plus pratiques", ["Menu par catégories et recherche dans tous les réglages", "Checklist de configuration avec barre de progression",
     "Boutons « Tester dans Discord » et « ↺ par défaut »", "Thème clair / sombre, changement rapide de serveur, Ctrl+S pour enregistrer",
     "Site : nouvelles pages Commandes, Premium et Statut"]],

@@ -27,6 +27,7 @@ from web.server import Dashboard
 
 ROOT = Path(__file__).resolve().parent
 COGS = [
+    "ops",
     "welcome",
     "engagement",
     "events",
@@ -54,6 +55,7 @@ COGS = [
     "custom",
     "modmail",
     "invites",
+    "votes",
 ]
 
 
@@ -88,6 +90,7 @@ class AllInOneBot(commands.Bot):
         )
         self.db = Database(os.getenv("DATABASE_PATH") or ROOT / "data" / "bot.db")
         self.version = __version__
+        self.previous_shutdown_clean = True
         self.dashboard = Dashboard(self)
         self._statuses = itertools.cycle([
             lambda b: discord.CustomActivity(name=f"🌐 {len(b.guilds)} serveurs • /help"),
@@ -100,6 +103,9 @@ class AllInOneBot(commands.Bot):
         install_translation()  # messages traduits en anglais pour les serveurs réglés en anglais
         await self.db.connect()
         log.info("Base de données prête (schéma v%d)", self.db.version)
+        # « 0 » pendant que le bot tourne, « 1 » après un arrêt propre : sinon, c'était un plantage.
+        self.previous_shutdown_clean = await self.db.get_setting(0, "clean_shutdown") != "0"
+        await self.db.set_setting(0, "clean_shutdown", "0")
         await store.load_all(self.db)
         await premium.load(self.db)
 
@@ -196,6 +202,11 @@ class AllInOneBot(commands.Bot):
             task.cancel()
         await self.dashboard.stop()
         await super().close()
+        if self.db.conn:
+            try:
+                await self.db.set_setting(0, "clean_shutdown", "1")
+            except Exception:
+                log.exception("Impossible de noter l'arrêt propre")
         await self.db.close()
 
 

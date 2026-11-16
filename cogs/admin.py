@@ -13,7 +13,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot import diagnostic, embeds
+from bot import backups, diagnostic, embeds
 from bot.db import PENDING_RESTORE, validate_backup
 from bot.utils import dashboard_url
 
@@ -32,7 +32,7 @@ HELP_SECTIONS = {
     "🛡️ Sécurité": ["/security", "/lockdown", "/whitelist"],
     "💎 Premium": ["/premium", "/giveaway start", "/giveaway end", "/giveaway reroll", "/giveaway list",
                   "/sondage creer", "/sondage fin", "/leaderboard periode:semaine|mois"],
-    "ℹ️ Infos": ["/help", "/invite", "/ping", "/botinfo", "/serverinfo", "/userinfo"],
+    "ℹ️ Infos": ["/help", "/invite", "/vote", "/ping", "/botinfo", "/serverinfo", "/userinfo"],
 }
 
 
@@ -155,10 +155,14 @@ class Admin(commands.Cog):
             return
         await interaction.response.defer(ephemeral=True)
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        target = ROOT / "data" / "backups" / f"bot_{stamp}.db"
-        await self.bot.db.backup_to(target)  # type: ignore[attr-defined]
+        folder = Path(self.bot.db.path).parent / "backups"  # type: ignore[attr-defined]
+        raw = folder / f"bot_{stamp}.db"
+        await self.bot.db.backup_to(raw)  # type: ignore[attr-defined]
+        target = raw.with_suffix(".db.gz")  # compressée : environ 5 fois plus petite
+        await asyncio.to_thread(backups.compress, raw, target)
+        raw.unlink(missing_ok=True)
         data = target.read_bytes()
-        if len(data) > 8 * 1024 * 1024:
+        if len(data) > backups.env_int("BACKUP_UPLOAD_MB", 8, 1, 500) * 1024 * 1024:
             await interaction.followup.send(embed=embeds.success(f"Sauvegarde créée : `{target.name}` "
                                                                  "(trop lourde pour Discord)."), ephemeral=True)
             return
@@ -166,7 +170,7 @@ class Admin(commands.Cog):
                                         file=discord.File(io.BytesIO(data), filename=target.name), ephemeral=True)
 
     @app_commands.command(name="restore", description="[Propriétaire du bot] Remplace la base par une sauvegarde")
-    @app_commands.describe(fichier="Fichier .db obtenu avec /backup")
+    @app_commands.describe(fichier="Fichier .db ou .db.gz obtenu avec /backup ou la sauvegarde automatique")
     @app_commands.default_permissions(administrator=True)
     async def restore(self, interaction: discord.Interaction, fichier: discord.Attachment) -> None:
         # Sert surtout à déménager le bot (PC → Railway) : la base de TOUS les serveurs est remplacée.
@@ -179,7 +183,12 @@ class Admin(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         db_path = Path(self.bot.db.path)  # type: ignore[attr-defined]
         tmp = db_path.parent / (PENDING_RESTORE + ".tmp")
-        tmp.write_bytes(await fichier.read())
+        try:
+            content = backups.maybe_decompress(await fichier.read())
+        except ValueError as exc:
+            await interaction.followup.send(embed=embeds.error(str(exc)), ephemeral=True)
+            return
+        tmp.write_bytes(content)
         error = await asyncio.to_thread(validate_backup, tmp)
         if error:
             tmp.unlink(missing_ok=True)

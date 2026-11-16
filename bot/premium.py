@@ -22,6 +22,19 @@ if TYPE_CHECKING:
 log = logging.getLogger("bot.premium")
 
 
+def trial_days() -> int:
+    """Durée de l'essai gratuit (PREMIUM_TRIAL_DAYS, 7 par défaut, 0 = pas d'essai)."""
+    raw = os.getenv("PREMIUM_TRIAL_DAYS", "").strip()
+    try:
+        days = int(raw) if raw else 7
+    except ValueError:
+        days = 7
+    return max(0, min(30, days))
+
+
+TRIAL_KEY = "premium_trial"  # table settings : fin de l'essai (horodatage), présent = essai déjà utilisé
+
+
 def sku_id() -> int:
     raw = os.getenv("PREMIUM_SKU_ID", "").strip()
     return int(raw) if raw.isdigit() else 0
@@ -105,6 +118,29 @@ class PremiumRegistry:
         self.grants[guild_id] = expires
         self._changed(guild_id)
         return expires
+
+    # --- essai gratuit (une fois par serveur) ------------------------------
+    async def trial_state(self, db: "Database", guild_id: int) -> str:
+        """« available », « used » (déjà utilisé), « active » (en cours), « premium » (déjà Premium) ou « off »."""
+        ends = await db.get_setting(guild_id, TRIAL_KEY)
+        if ends:
+            return "active" if self.is_premium(guild_id) and float(ends) > time.time() else "used"
+        if self.is_premium(guild_id):
+            return "premium"
+        return "available" if trial_days() else "off"
+
+    async def start_trial(self, db: "Database", guild_id: int, by: int) -> float:
+        """Démarre l'essai. Renvoie la date de fin ; lève ValueError si ce n'est pas possible."""
+        state = await self.trial_state(db, guild_id)
+        if state != "available":
+            raise ValueError({"used": "L'essai gratuit a déjà été utilisé sur ce serveur.",
+                              "active": "L'essai gratuit est déjà en cours.",
+                              "premium": "Ce serveur est déjà Premium.",
+                              "off": "L'essai gratuit n'est pas proposé."}[state])
+        days = trial_days()
+        expires = await self.grant(db, guild_id, by, days, note="essai gratuit")
+        await db.set_setting(guild_id, TRIAL_KEY, str(expires))
+        return expires or time.time() + days * 86400
 
     async def revoke(self, db: "Database", guild_id: int) -> None:
         await db.execute("DELETE FROM premium_grants WHERE guild_id=?", (guild_id,))

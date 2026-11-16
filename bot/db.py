@@ -410,6 +410,18 @@ MIGRATIONS: list[str] = [
     );
     CREATE INDEX idx_message_log ON message_log (guild_id, created_at);
     """,
+    # v20 — votes top.gg (récompense récupérée avec /vote sur le serveur choisi)
+    """
+    CREATE TABLE bot_votes (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id       INTEGER NOT NULL,
+        voted_at      REAL    NOT NULL,
+        weekend       INTEGER NOT NULL DEFAULT 0,
+        claimed_guild INTEGER,
+        claimed_at    REAL
+    );
+    CREATE INDEX idx_bot_votes_user ON bot_votes (user_id, voted_at);
+    """,
 ]
 
 
