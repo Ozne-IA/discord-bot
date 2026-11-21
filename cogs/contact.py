@@ -39,7 +39,8 @@ class ContactView(discord.ui.View):
             button = discord.ui.Button(label=label, emoji=emoji, style=discord.ButtonStyle.secondary)
             button.callback = self._open(cog, kind)
             self.add_item(button)
-        self.add_item(discord.ui.Button(label="E-mail", emoji="📧", url=f"mailto:{contact.contact_email()}"))
+        # Pas de bouton « mailto: » : Discord n'accepte que des liens http(s) et refuse tout le message.
+        # L'adresse e-mail est déjà écrite dans le texte de la commande.
 
     @staticmethod
     def _open(cog: "Contact", kind: str):

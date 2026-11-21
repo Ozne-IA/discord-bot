@@ -379,7 +379,7 @@ function control(f) {
       { key: "message", type: "text", placeholder: "Message (vide = message par défaut)" },
     ], { url: "", channel: 0, message: "" }, "➕ Ajouter un flux RSS");
     case "panel_access": return objectList(f.path, [
-      { key: "role", type: "role", empty: "— Choisir un rôle —" },
+      { key: "role", type: "role", empty: "— Choisir un rôle —", rowClass: "row-access" },
       ...ACCESS_GROUPS.map(([key, label]) => ({ key, type: "checkbox", placeholder: label })),
     ], () => Object.fromEntries([["role", 0], ...ACCESS_GROUPS.map(([k]) => [k, false])]), "➕ Ajouter un rôle", 10);
     case "shop": return objectList(f.path, [
@@ -547,7 +547,8 @@ function objectList(path, columns, blank, addLabel, max = 25) {
   const draw = () => {
     const list = get(state.cfg, path) || [];
     wrap.replaceChildren(
-      ...list.map((item, i) => h("div", { class: "row" + (columns.some((c) => c.wide) ? " row-wide" : "") },
+      ...list.map((item, i) => h("div", { class: "row" + (columns.some((c) => c.wide) ? " row-wide" : "")
+        + (columns.find((c) => c.rowClass)?.rowClass ? " " + columns.find((c) => c.rowClass).rowClass : "") },
         columns.map((col) => {
           const put = (v) => { list[i] = { ...list[i], [col.key]: v }; set(state.cfg, path, [...list]); };
           if (col.type === "channel") return selectId(channelOptions("text"), item[col.key], put, col.empty || "— Salon d'annonce —");

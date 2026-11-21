@@ -28,6 +28,15 @@ def test_cooldown_and_report():
     assert "message privé" in contact.format_report("weird", "s", "m", "a", 1, None, None)[1]
 
 
+async def test_contact_view_only_has_valid_buttons():
+    """Discord refuse les boutons lien qui ne sont pas http(s) (ex. mailto:) : /contact renvoyait une erreur."""
+    view = contact_cog.ContactView(contact_cog.Contact(SimpleNamespace(get_cog=lambda name: None)))
+    assert len(view.children) == len(contact.KINDS)
+    for item in view.children:
+        url = getattr(item, "url", None)
+        assert url is None or url.startswith(("https://", "http://")), url
+
+
 class FakeResponse:
     def __init__(self):
         self.sent = []

@@ -213,6 +213,11 @@ input[type=color] { width: 54px; height: 40px; border: 1px solid var(--line); bo
 .inline-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; flex: 0 0 auto !important; }
 .row-wide { flex-wrap: wrap; }
 .row-wide > textarea { flex-basis: 100%; order: 10; }
+/* Accès au panel : le rôle sur sa propre ligne, puis les cases à cocher qui passent à la ligne.
+   Sur PC, tout sur une seule ligne écrasait le choix du rôle et faisait déborder les cases. */
+.row-access { flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.row-access > select { flex: 1 1 100%; }
+.row-access .inline-check { padding: 4px 0; }
 .menu-block { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-2); }
 .menu-block.over-limit { border-color: rgba(227,160,8,.5); }
 input[type=datetime-local] { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 9px; padding: 9px 10px; font: inherit; }
@@ -357,7 +362,6 @@ input[type=datetime-local] { background: var(--bg-2); color: var(--text); border
 .badge-new { background: var(--err); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px; margin-left: auto; }
 .kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; font-size: 12px; }
 @media (max-width: 860px) {
-  .site-nav { display: none; }
   .nav-group > button { display: none; }
   .nav-group, .nav-items, .nav-group.closed .nav-items { display: contents; }
   .nav-search, .guild-switch { display: none; }
@@ -391,4 +395,41 @@ input[type=datetime-local] { background: var(--bg-2); color: var(--text); border
   /* Panel connecté sur téléphone : la barre du haut tient sur une ligne */
   .topbar:has(.user-chip:not([hidden])) { gap: 6px; }
   .topbar:has(.user-chip:not([hidden])) .brand span { display: none; }
+}
+
+/* ---------- téléphones et tablettes ---------- */
+/* L'attribut hidden doit gagner contre display:flex (le bloc « Déconnexion » apparaissait même déconnecté). */
+[hidden] { display: none !important; }
+
+@media (max-width: 860px) {
+  /* Le menu du site (Fonctions, Commandes, Premium, Statut, Contact) ne disparaît plus :
+     il passe sur une 2e ligne qu'on fait défiler du doigt. */
+  .topbar:has(.site-nav) { flex-wrap: wrap; row-gap: 2px; }
+  .site-nav { order: 3; flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; gap: 2px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 0 -8px; padding: 0 8px; }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .site-nav a { white-space: nowrap; padding: 11px 14px; flex: 0 0 auto; }
+  /* Cibles tactiles d'au moins 40 px */
+  .btn.small { padding: 9px 14px; min-height: 40px; }
+  footer.site a { display: inline-block; padding: 10px 8px; }
+  .hero { padding: 56px 20px 40px; }
+  .features { padding: 12px 16px 56px; }
+}
+
+@media (max-width: 600px) {
+  .topbar { gap: 8px; padding: 10px 12px; }
+  .brand { min-width: 0; gap: 8px; font-size: 16px; }
+  .brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 24vw; }
+  /* Boutons de la barre du haut : le texte peut passer à la ligne plutôt que déborder de l'écran */
+  .topbar > .btn { white-space: normal; text-align: center; line-height: 1.2; flex-shrink: 1; min-width: 0; }
+  .hero .actions .btn.big { width: 100%; }
+  .stats { gap: 24px; }
+  body { overflow-wrap: break-word; }
+  table { font-size: 13px; }
+}
+
+/* Tablettes : réseau de cartes plus aéré, contenu centré */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .container, .hero, .features { max-width: 900px; }
+  .site-nav a { padding: 12px 16px; }
 }
