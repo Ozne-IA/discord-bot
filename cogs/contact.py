@@ -39,8 +39,8 @@ class ContactView(discord.ui.View):
             button = discord.ui.Button(label=label, emoji=emoji, style=discord.ButtonStyle.secondary)
             button.callback = self._open(cog, kind)
             self.add_item(button)
-        # Pas de bouton « mailto: » : Discord n'accepte que des liens http(s) et refuse tout le message.
-        # L'adresse e-mail est déjà écrite dans le texte de la commande.
+        # Pas de bouton « mailto: » : Discord n'accepte que des liens http(s) et refuse tout le message
+        # (c'était la vraie cause de l'erreur de /contact). L'e-mail est déjà écrit dans le texte de la commande.
 
     @staticmethod
     def _open(cog: "Contact", kind: str):
@@ -62,28 +62,58 @@ class Contact(commands.Cog):
 
     @app_commands.command(name="contact", description="Signaler un bug, proposer une idée ou écrire au créateur du bot")
     async def contact_cmd(self, interaction: discord.Interaction) -> None:
-        email = contact.contact_email()
-        await interaction.response.send_message(embed=embeds.info(
-            "Un module ne marche pas, une idée, une question ? Choisis ci-dessous : ton message arrive "
-            f"directement au créateur du bot.\n\nTu peux aussi écrire à **{email}**.", "📬 Contacter le créateur"),
-            view=ContactView(self), ephemeral=True)
+        try:
+            email = contact.contact_email()
+            view = ContactView(self)
+            await interaction.response.send_message(
+                embed=embeds.info(
+                    "Un module ne marche pas, une idée, une question ? Choisis ci-dessous : ton message arrive "
+                    f"directement au créateur du bot.\n\nTu peux aussi écrire à **{email}**.",
+                    "📬 Contacter le créateur"),
+                view=view,
+                ephemeral=True,
+            )
+        except Exception:
+            log.exception("Échec de /contact (affichage)")
+            # Dernier recours : message sans view
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(
+                        "Impossible d'afficher le formulaire. Écris à "
+                        f"**{contact.contact_email()}** ou réessaie plus tard.",
+                        ephemeral=True)
+                else:
+                    await interaction.response.send_message(
+                        "Impossible d'afficher le formulaire. Écris à "
+                        f"**{contact.contact_email()}** ou réessaie plus tard.",
+                        ephemeral=True)
+            except Exception:
+                log.exception("Échec total de /contact")
 
     async def send_report(self, interaction: discord.Interaction, kind: str, subject: str, message: str) -> None:
         if self.cooldown.remaining(interaction.user.id) > 0:
-            await interaction.response.send_message(embed=embeds.error("Tu as déjà envoyé un message il y a peu."),
-                                                    ephemeral=True)
+            await interaction.response.send_message(
+                embed=embeds.error("Tu as déjà envoyé un message il y a peu."),
+                ephemeral=True)
             return
         guild = interaction.guild
-        title, text = contact.format_report(kind, subject, message, str(interaction.user), interaction.user.id,
-                                            guild.name if guild else None, guild.id if guild else None)
+        title, text = contact.format_report(
+            kind, subject, message, str(interaction.user), interaction.user.id,
+            guild.name if guild else None, guild.id if guild else None)
         ops = self.bot.get_cog("Ops")
         sent = False
         if ops is not None:
-            sent = await ops.notify(title, text, color=COLORS.get(kind, 0x5865F2), force=True)  # type: ignore[attr-defined]
+            try:
+                sent = await ops.notify(title, text, color=COLORS.get(kind, 0x5865F2), force=True)  # type: ignore[attr-defined]
+            except Exception:
+                log.exception("ops.notify a échoué pour /contact")
         if not sent:
             log.warning("Message /contact impossible à transmettre (%s) : %s", kind, subject[:100])
+            email = contact.contact_email()
             await interaction.response.send_message(embed=embeds.error(
-                f"Le message n'a pas pu être transmis. Écris directement à {contact.contact_email()}."),
+                "Le message n'a pas pu être transmis automatiquement "
+                "(MP du créateur fermés ou aucun salon d'alerte configuré).\n\n"
+                f"Envoie-le directement à **{email}**."),
                 ephemeral=True)
             return
         self.cooldown.hit(interaction.user.id)
